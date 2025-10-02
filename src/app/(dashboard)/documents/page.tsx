@@ -11,7 +11,6 @@ import { ConfirmModal } from '@/components/ui/modal';
 import { ViewDocumentModal, EditDocumentModal, UploadDocumentModal } from '@/components/forms/document-modals';
 import { 
   Search, 
-  Upload, 
   Filter, 
   Grid, 
   List,
@@ -20,7 +19,6 @@ import {
   File,
   Download,
   Eye,
-  Edit,
   Trash2,
   MoreVertical,
   Folder,
@@ -102,16 +100,17 @@ export default function DocumentsPage() {
   ]);
 
   // Modal state
-  const [selectedDocument, setSelectedDocument] = useState(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewDocumentModal, setViewDocumentModal] = useState(false);
   const [editDocumentModal, setEditDocumentModal] = useState(false);
   const [uploadDocumentModal, setUploadDocumentModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Event handlers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteDocument = (document: any) => {
     setSelectedDocument(document);
     setDeleteModalOpen(true);
@@ -124,21 +123,13 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleViewDocument = (document: any) => {
-    setSelectedDocument(document);
-    setViewDocumentModal(true);
-  };
-
-  const handleEditDocument = (document: any) => {
-    setSelectedDocument(document);
-    setEditDocumentModal(true);
-  };
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveDocument = (documentData: any) => {
     console.log('Saving document:', documentData);
     // In a real app, this would make an API call
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUploadDocument = (fileData: any) => {
     console.log('Uploading document:', fileData);
     // In a real app, this would make an API call

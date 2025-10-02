@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, Mail, MessageSquare, Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Bell, Mail, MessageSquare } from 'lucide-react';
 
 interface NotificationSettings {
   email: {
@@ -43,7 +43,8 @@ interface NotificationSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   settings: NotificationSettings;
-  onSave: (settings: NotificationSettings) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSave: (settings: any) => void;
 }
 
 export function NotificationSettingsModal({ isOpen, onClose, settings, onSave }: NotificationSettingsModalProps) {
@@ -75,7 +76,7 @@ export function NotificationSettingsModal({ isOpen, onClose, settings, onSave }:
     });
   };
 
-  const updateQuietHours = (field: keyof NotificationSettings['quietHours'], value: any) => {
+  const updateQuietHours = (field: keyof NotificationSettings['quietHours'], value: unknown) => {
     setNotificationSettings({
       ...notificationSettings,
       quietHours: { ...notificationSettings.quietHours, [field]: value }

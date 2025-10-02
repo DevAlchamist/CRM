@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { User, Target, Calendar, FileText, Plus } from 'lucide-react';
+// import { User, Target, Calendar, FileText } from 'lucide-react';
 
 interface QuickAddCustomerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (customerData: any) => void;
 }
 
@@ -162,6 +162,7 @@ export function QuickAddCustomerModal({ isOpen, onClose, onSave }: QuickAddCusto
 interface QuickAddLeadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (leadData: any) => void;
 }
 
@@ -329,6 +330,7 @@ export function QuickAddLeadModal({ isOpen, onClose, onSave }: QuickAddLeadModal
 interface QuickAddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (taskData: any) => void;
 }
 
@@ -480,6 +482,7 @@ export function QuickAddTaskModal({ isOpen, onClose, onSave }: QuickAddTaskModal
 interface QuickAddEventModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (eventData: any) => void;
 }
 

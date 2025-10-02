@@ -32,7 +32,7 @@ export function DashboardWidget({
   icon: Icon,
   iconColor = 'text-blue-600',
   iconBg = 'bg-blue-100',
-  trend,
+  // trend,
   className,
   children
 }: DashboardWidgetProps) {

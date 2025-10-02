@@ -10,12 +10,9 @@ import { ChangePlanModal, PaymentMethodModal, BillingHistoryModal } from '@/comp
 import { 
   CreditCard, 
   Download, 
-  Calendar, 
   Users,
   Check,
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
   Edit,
   Eye,
   Plus
@@ -26,7 +23,8 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 export default function BillingPage() {
   const [selectedPlan, setSelectedPlan] = useState(subscriptionPlans[2]); // Pro plan
   const [viewInvoiceModal, setViewInvoiceModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [paymentMethodModal, setPaymentMethodModal] = useState(false);
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [billingHistoryModal, setBillingHistoryModal] = useState(false);
@@ -71,10 +69,11 @@ export default function BillingPage() {
       }
     };
 
-    const handleSavePaymentMethod = (paymentData: any) => {
-      console.log('Saving payment method:', paymentData);
-      // In a real app, this would save the payment method
-    };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSavePaymentMethod = (paymentData: any) => {
+    console.log('Saving payment method:', paymentData);
+    // In a real app, this would save the payment method
+  };
 
     return (
     <DashboardLayout title="Billing & Subscription" userRole="admin">

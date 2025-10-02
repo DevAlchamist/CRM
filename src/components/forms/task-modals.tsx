@@ -240,7 +240,7 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'call' | 'meeting' | 'email' | 'follow_up' | 'other' })}
             >
               {taskTypes.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -256,7 +256,7 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'high' | 'medium' | 'low' })}
             >
               {priorities.map((priority) => (
                 <option key={priority.value} value={priority.value}>
@@ -272,7 +272,7 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'pending' | 'in_progress' | 'completed' | 'cancelled' })}
             >
               {statuses.map((status) => (
                 <option key={status.value} value={status.value}>

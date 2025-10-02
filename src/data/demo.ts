@@ -8,6 +8,8 @@ import {
   SubscriptionPlan,
   DashboardStats,
   KPIMetric,
+  Message,
+  Conversation,
   ChartData
 } from '@/types';
 
@@ -506,18 +508,18 @@ export const kpiMetrics: KPIMetric[] = [
 
 // Chart Data for Analytics
 export const revenueChartData: ChartData[] = [
-  { name: 'Jan', revenue: 85000, deals: 12 },
-  { name: 'Feb', revenue: 92000, deals: 15 },
-  { name: 'Mar', revenue: 78000, deals: 11 },
-  { name: 'Apr', revenue: 105000, deals: 18 },
-  { name: 'May', revenue: 98000, deals: 16 },
-  { name: 'Jun', revenue: 112000, deals: 19 },
-  { name: 'Jul', revenue: 125000, deals: 22 },
-  { name: 'Aug', revenue: 118000, deals: 20 },
-  { name: 'Sep', revenue: 132000, deals: 24 },
-  { name: 'Oct', revenue: 145000, deals: 26 },
-  { name: 'Nov', revenue: 138000, deals: 25 },
-  { name: 'Dec', revenue: 125000, deals: 22 },
+  { name: 'Jan', value: 85000, revenue: 85000, deals: 12 },
+  { name: 'Feb', value: 92000, revenue: 92000, deals: 15 },
+  { name: 'Mar', value: 78000, revenue: 78000, deals: 11 },
+  { name: 'Apr', value: 105000, revenue: 105000, deals: 18 },
+  { name: 'May', value: 98000, revenue: 98000, deals: 16 },
+  { name: 'Jun', value: 112000, revenue: 112000, deals: 19 },
+  { name: 'Jul', value: 125000, revenue: 125000, deals: 22 },
+  { name: 'Aug', value: 118000, revenue: 118000, deals: 20 },
+  { name: 'Sep', value: 132000, revenue: 132000, deals: 24 },
+  { name: 'Oct', value: 145000, revenue: 145000, deals: 26 },
+  { name: 'Nov', value: 138000, revenue: 138000, deals: 25 },
+  { name: 'Dec', value: 125000, revenue: 125000, deals: 22 },
 ];
 
 export const leadsByStageData: ChartData[] = [

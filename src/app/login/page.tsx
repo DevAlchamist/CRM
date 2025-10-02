@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Eye, EyeOff } from 'lucide-react';
+import { Building2, Eye } from 'lucide-react';
 
 export default function LoginPage() {
   return (

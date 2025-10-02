@@ -10,7 +10,7 @@ interface Column<T> {
   key: string;
   title: string;
   sortable?: boolean;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
   width?: string;
 }
 
@@ -24,7 +24,7 @@ interface DataTableProps<T> {
   pageSize?: number;
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   searchable = true,
@@ -54,8 +54,16 @@ export function DataTable<T extends Record<string, any>>({
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
     
-    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    // Handle different types for comparison
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+    
+    // Convert to comparable values
+    const aComparable = typeof aValue === 'string' ? aValue.toLowerCase() : aValue;
+    const bComparable = typeof bValue === 'string' ? bValue.toLowerCase() : bValue;
+    
+    if (aComparable < bComparable) return sortDirection === 'asc' ? -1 : 1;
+    if (aComparable > bComparable) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
 
@@ -160,7 +168,7 @@ export function DataTable<T extends Record<string, any>>({
                   <td key={column.key} className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {column.render 
                       ? column.render(row[column.key], row)
-                      : row[column.key]
+                      : String(row[column.key] || '')
                     }
                   </td>
                 ))}

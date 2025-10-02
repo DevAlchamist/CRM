@@ -86,7 +86,7 @@ export default function PricingPage() {
                   </ul>
                   <Button 
                     className="w-full" 
-                    variant={plan.popular ? 'default' : 'outline'}
+                    variant={plan.isPopular ? 'default' : 'outline'}
                     size="lg"
                     asChild
                   >

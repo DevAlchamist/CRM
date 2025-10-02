@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Building2, Users, ArrowRight, Check, Globe, Shield, Zap, Mail, Send } from 'lucide-react';
+import { Building2, Users, ArrowRight, Check, Mail, Send } from 'lucide-react';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);

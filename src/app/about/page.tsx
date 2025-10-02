@@ -1,8 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Users, Target, Award, Globe, Heart } from 'lucide-react';
+import { Building2, Users, Target, Award, Heart } from 'lucide-react';
 
 export default function AboutPage() {
   const team = [
@@ -169,9 +170,11 @@ export default function AboutPage() {
               <Card key={index} className="text-center">
                 <CardContent className="pt-6">
                   <div className="h-24 w-24 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
-                    <img 
+                    <Image 
                       src={member.image} 
                       alt={member.name}
+                      width={200}
+                      height={200}
                       className="w-full h-full object-cover"
                     />
                   </div>

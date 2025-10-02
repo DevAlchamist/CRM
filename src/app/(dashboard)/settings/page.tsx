@@ -19,7 +19,6 @@ import {
   Key,
   Save,
   Upload,
-  Trash2,
   Edit,
   Check,
   X,
@@ -71,6 +70,7 @@ export default function SettingsPage() {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveProfile = (profileData: any) => {
     setCurrentUser({ ...currentUser, ...profileData });
     setEditProfileModal(false);
@@ -86,6 +86,7 @@ export default function SettingsPage() {
     setDeleteAccountModal(false);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveNotificationSettings = (settings: any) => {
     setNotificationSettings(settings);
     setNotificationModal(false);

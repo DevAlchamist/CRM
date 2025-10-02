@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Check, AlertCircle, Calendar, Users, Zap } from 'lucide-react';
+import { CreditCard, Check, AlertCircle, Users, Zap } from 'lucide-react';
 
 interface SubscriptionPlan {
   id: string;
@@ -161,6 +161,7 @@ export function ChangePlanModal({ isOpen, onClose, currentPlan, availablePlans, 
 interface PaymentMethodModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (paymentData: any) => void;
 }
 

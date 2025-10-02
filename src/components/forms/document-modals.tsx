@@ -8,7 +8,7 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { FileText, Download, Eye, Edit, Trash2, Share2, Star, Folder, Upload, X } from 'lucide-react';
+import { FileText, Download, Edit, Star, Upload } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -275,6 +275,7 @@ export function EditDocumentModal({ isOpen, onClose, document, onSave }: EditDoc
 interface UploadDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpload: (fileData: any) => void;
 }
 

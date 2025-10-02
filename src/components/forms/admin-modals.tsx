@@ -8,7 +8,7 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Building2, Users, DollarSign, Shield, AlertTriangle, CheckCircle, Eye, Edit, Trash2 } from 'lucide-react';
+import { Building2, Users, DollarSign, Shield, Edit } from 'lucide-react';
 
 interface Company {
   id: string;

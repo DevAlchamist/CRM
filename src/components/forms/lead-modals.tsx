@@ -5,9 +5,9 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Lead } from '@/types';
-import { getInitials } from '@/lib/utils';
+// import { getInitials } from '@/lib/utils';
 
 interface ViewLeadModalProps {
   isOpen: boolean;
@@ -202,7 +202,7 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.stage}
-              onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, stage: e.target.value as 'prospect' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost' })}
             >
               {stages.map((stage) => (
                 <option key={stage.value} value={stage.value}>

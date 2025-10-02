@@ -13,7 +13,6 @@ import {
   Search, 
   Filter, 
   Plus, 
-  MoreHorizontal, 
   Phone, 
   Mail, 
   Building,

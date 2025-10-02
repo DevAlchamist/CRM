@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,17 +17,14 @@ import {
   Phone,
   Video,
   Mail,
-  Clock,
-  Pin,
-  Archive,
-  Star
+  Pin
 } from 'lucide-react';
-import { demoUsers, demoConversations, demoMessages } from '@/data/demo';
+import { demoConversations, demoMessages } from '@/data/demo';
 import { getInitials, getRelativeTime } from '@/lib/utils';
 import { Conversation, Message } from '@/types';
 
 export default function MessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(demoConversations);
+  const [conversations] = useState<Conversation[]>(demoConversations);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(conversations[0]);
   const [messages, setMessages] = useState<Message[]>(demoMessages);
   const [newMessage, setNewMessage] = useState('');

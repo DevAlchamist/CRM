@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +23,11 @@ export function Notification({
 }: NotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(() => onClose(id), 300);
+  }, [onClose, id]);
+
   useEffect(() => {
     setIsVisible(true);
     
@@ -33,12 +38,7 @@ export function Notification({
       
       return () => clearTimeout(timer);
     }
-  }, [duration]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => onClose(id), 300);
-  };
+  }, [duration, handleClose]);
 
   const icons = {
     success: CheckCircle,

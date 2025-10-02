@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,7 +21,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { demoLeads, demoUsers } from '@/data/demo';
-import { formatCurrency, formatDate, getStatusColor, getInitials } from '@/lib/utils';
+import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import { Lead } from '@/types';
 
 const stages = [
@@ -82,12 +82,13 @@ export default function LeadsPage() {
       const newLead: Lead = {
         id: Date.now().toString(),
         title: leadData.title || '',
+        customerId: '1', // Default customer ID
         customerName: leadData.customerName || '',
         value: leadData.value || 0,
         stage: leadData.stage || 'prospect',
         probability: leadData.probability || 10,
         source: leadData.source || 'website',
-        assignedToId: '1',
+        assignedTo: '1',
         assignedToName: 'John Doe',
         expectedCloseDate: leadData.expectedCloseDate || new Date(),
         description: leadData.description || '',

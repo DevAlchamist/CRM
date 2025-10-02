@@ -13,9 +13,7 @@ import {
   Search, 
   Filter, 
   Plus, 
-  MoreHorizontal, 
-  Mail, 
-  Phone,
+  Mail,
   Calendar,
   Shield,
   User,
@@ -72,12 +70,13 @@ export default function EmployeesPage() {
         name: employeeData.name || '',
         email: employeeData.email || '',
         role: employeeData.role || 'employee',
+        companyId: 'company-1', // Default company ID
         isActive: employeeData.isActive ?? true,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${employeeData.name}`,
         phone: employeeData.phone || '',
         department: employeeData.department || '',
         createdAt: new Date(),
-        lastLoginAt: null,
+        lastLoginAt: undefined,
       };
       setEmployees([...employees, newEmployee]);
     }

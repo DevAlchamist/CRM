@@ -5,6 +5,8 @@ export interface User {
   avatar?: string;
   role: 'admin' | 'manager' | 'employee';
   companyId: string;
+  phone?: string;
+  department?: string;
   createdAt: Date;
   lastLoginAt?: Date;
   isActive: boolean;

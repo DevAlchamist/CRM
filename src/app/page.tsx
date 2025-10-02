@@ -11,16 +11,9 @@ import {
   Target, 
   BarChart3, 
   Shield, 
-  Zap,
   Building2,
   MessageSquare,
   Calendar,
-  FileText,
-  CreditCard,
-  Settings,
-  Globe,
-  Lock,
-  Smartphone
 } from 'lucide-react';
 
 export default function LandingPage() {
