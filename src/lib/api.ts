@@ -1,4 +1,21 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:53321/api/';
+// API Configuration
+const getApiBaseUrl = () => {
+  // In production, use the environment variable
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // In development, use localhost
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:53321/api/';
+  }
+  
+  // Fallback for production without env var
+  console.warn('NEXT_PUBLIC_API_URL not set. Please configure your API URL in environment variables.');
+  return '/api/'; // Assume API routes are in the same domain
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Browser-compatible HTTP client with got-like API
 class ApiClient {
@@ -181,9 +198,19 @@ class ApiClient {
           throw timeoutError;
         }
         
-        // Network error (server down, no internet)
-        if (error.message.includes('fetch') || error.message.includes('network')) {
-          const networkError = new Error('Unable to reach server. Check your internet connection or try again.') as Error & { 
+        // Network error (server down, no internet, or CORS issues)
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+          const isProduction = process.env.NODE_ENV === 'production';
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'localhost:53321';
+          
+          let errorMessage = 'Unable to reach server. ';
+          if (isProduction) {
+            errorMessage += `API URL: ${apiUrl}. Please check if the API server is running and accessible.`;
+          } else {
+            errorMessage += 'Check your internet connection or try again.';
+          }
+          
+          const networkError = new Error(errorMessage) as Error & { 
             isNetworkError: boolean; 
             statusCode: number;
             response: { status: number; body: unknown };
@@ -192,7 +219,7 @@ class ApiClient {
           networkError.statusCode = 0;
           networkError.response = {
             status: 0,
-            body: { message: 'Network error' },
+            body: { message: 'Network error', apiUrl },
           };
           throw networkError;
         }
