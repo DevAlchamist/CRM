@@ -1,12 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Task } from '@/types';
+import { PermissionGuard } from '@/components/auth/PermissionGuard';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Task, Customer, Lead } from '@/types';
 import { formatDate } from '@/lib/utils';
+import api from '@/lib/api';
+
+interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface ViewTaskModalProps {
   isOpen: boolean;
@@ -154,6 +164,12 @@ interface AddEditTaskModalProps {
 }
 
 export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskModalProps) {
+  const { can } = usePermissions();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const hasFetchedData = React.useRef(false);
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
@@ -161,10 +177,99 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
     dueDate: task?.dueDate?.toISOString().split('T')[0] || '',
+    assignedTo: task?.assignedTo || '',
     assignedToName: task?.assignedToName || '',
     relatedToType: task?.relatedTo?.type || '',
+    relatedToId: task?.relatedTo?.id || '',
     relatedToName: task?.relatedTo?.name || '',
   });
+
+  // Fetch customers, leads, and employees when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    // Only fetch once - cache the data
+    if (hasFetchedData.current) return;
+    
+    const fetchData = async () => {
+      // Prevent multiple simultaneous calls
+      if (isLoadingData) return;
+      
+      hasFetchedData.current = true;
+      
+      try {
+        setIsLoadingData(true);
+          
+          // Fetch customers
+          const { body: customersBody } = await api.get('customers?limit=100');
+          const customersData = customersBody as any;
+          const customersList = (customersData?.result?.data || customersData?.data || []) as any[];
+          const normalizedCustomers: Customer[] = customersList.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone ?? '',
+            company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+            status: c.status ?? 'active',
+            source: c.source ?? 'website',
+            tags: c.tags ?? [],
+            totalValue: c.totalValue ?? 0,
+            createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+            lastContactAt: c.lastContactAt ? new Date(c.lastContactAt) : new Date(),
+            notes: c.notes ?? '',
+            avatar: c.avatar,
+          }));
+          setCustomers(normalizedCustomers);
+
+          // Fetch leads
+          const { body: leadsBody } = await api.get('leads?limit=100');
+          const leadsData = leadsBody as any;
+          const leadsList = (leadsData?.result?.data || leadsData?.data || []) as any[];
+          const normalizedLeads: Lead[] = leadsList.map((l) => ({
+            id: l.id,
+            title: l.title,
+            customerId: l.customerId,
+            customerName: l.customerName,
+            value: l.value ?? 0,
+            stage: l.stage,
+            probability: l.probability ?? 0,
+            assignedTo: l.assignedTo ?? '',
+            assignedToName: l.assignedToName ?? '',
+            source: l.source ?? '',
+            createdAt: l.createdAt ? new Date(l.createdAt) : new Date(),
+            updatedAt: l.updatedAt ? new Date(l.updatedAt) : new Date(),
+            expectedCloseDate: l.expectedCloseDate ? new Date(l.expectedCloseDate) : new Date(),
+            description: l.description ?? '',
+          }));
+          setLeads(normalizedLeads);
+
+          // Fetch employees (if user has permission)
+          if (can('assign_task')) {
+            try {
+              const { body: employeesBody } = await api.get('users?limit=100');
+              const employeesData = employeesBody as any;
+              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as any[];
+              const normalizedEmployees: Employee[] = employeesList.map((e) => ({
+                id: e.id,
+                name: e.name,
+                email: e.email,
+                role: e.role,
+              }));
+              setEmployees(normalizedEmployees);
+            } catch (e) {
+              console.error('Failed to fetch employees', e);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch data', e);
+        } finally {
+          setIsLoadingData(false);
+        }
+      };
+      
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const taskTypes = [
     { value: 'call', label: 'Phone Call' },
@@ -192,9 +297,9 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
     onSave({
       ...formData,
       dueDate: new Date(formData.dueDate),
-      relatedTo: formData.relatedToName ? {
+      relatedTo: formData.relatedToId ? {
         type: formData.relatedToType as 'customer' | 'lead',
-        id: '1',
+        id: formData.relatedToId,
         name: formData.relatedToName,
       } : undefined,
     });
@@ -281,23 +386,44 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
               ))}
             </select>
           </div>
+          {/* Assigned To - Only show if user has permission */}
+          {can('assign_task') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Assigned To
+              </label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.assignedTo}
+                onChange={(e) => {
+                  const selectedEmployee = employees.find(emp => emp.id === e.target.value);
+                  setFormData({ 
+                    ...formData, 
+                    assignedTo: e.target.value,
+                    assignedToName: selectedEmployee?.name || ''
+                  });
+                }}
+              >
+                <option value="">
+                  {isLoadingData ? 'Loading...' : 'Select team member'}
+                </option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} ({employee.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Assigned To
-            </label>
-            <Input
-              value={formData.assignedToName}
-              onChange={(e) => setFormData({ ...formData, assignedToName: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Due Date
+              Due Date *
             </label>
             <Input
               type="date"
               value={formData.dueDate}
               onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              required
             />
           </div>
         </div>
@@ -310,7 +436,14 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
             <select
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.relatedToType}
-              onChange={(e) => setFormData({ ...formData, relatedToType: e.target.value })}
+              onChange={(e) => {
+                setFormData({ 
+                  ...formData, 
+                  relatedToType: e.target.value,
+                  relatedToId: '',
+                  relatedToName: ''
+                });
+              }}
             >
               <option value="">None</option>
               <option value="customer">Customer</option>
@@ -319,12 +452,40 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Related To Name
+              Related To
             </label>
-            <Input
-              value={formData.relatedToName}
-              onChange={(e) => setFormData({ ...formData, relatedToName: e.target.value })}
-            />
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.relatedToId}
+              onChange={(e) => {
+                let selectedItem;
+                if (formData.relatedToType === 'customer') {
+                  selectedItem = customers.find(c => c.id === e.target.value);
+                } else if (formData.relatedToType === 'lead') {
+                  selectedItem = leads.find(l => l.id === e.target.value);
+                }
+                setFormData({ 
+                  ...formData, 
+                  relatedToId: e.target.value,
+                  relatedToName: (selectedItem as any)?.name || (selectedItem as any)?.title || ''
+                });
+              }}
+              disabled={!formData.relatedToType || isLoadingData}
+            >
+              <option value="">
+                {isLoadingData ? 'Loading...' : `Select a ${formData.relatedToType || 'item'}`}
+              </option>
+              {formData.relatedToType === 'customer' && customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name} ({customer.email})
+                </option>
+              ))}
+              {formData.relatedToType === 'lead' && leads.map((lead) => (
+                <option key={lead.id} value={lead.id}>
+                  {lead.title} - {lead.customerName}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

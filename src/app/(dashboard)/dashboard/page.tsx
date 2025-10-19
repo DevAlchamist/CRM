@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,11 +44,13 @@ import {
   Bar 
 } from 'recharts';
 import { QuickAddCustomerModal, QuickAddLeadModal, QuickAddTaskModal, QuickAddEventModal } from '@/components/forms/quick-action-modals';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const COLORS = ['#2563EB', '#10B981', '#F59E0B', '#DC2626', '#8B5CF6', '#06B6D4'];
 
 export default function DashboardPage() {
   const [quickAddCustomerModal, setQuickAddCustomerModal] = useState(false);
+  const userRole = useUserRole();
   const [quickAddLeadModal, setQuickAddLeadModal] = useState(false);
   const [quickAddTaskModal, setQuickAddTaskModal] = useState(false);
   const [quickAddEventModal, setQuickAddEventModal] = useState(false);
@@ -80,7 +83,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <DashboardLayout title="Dashboard" userRole="admin">
+    <ProtectedRoute>
+      <DashboardLayout title="Dashboard" userRole={userRole} onAddClick={() => setQuickAddCustomerModal(true)}>
       <div className="space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -389,5 +393,6 @@ export default function DashboardPage() {
         onSave={handleQuickAddEvent}
       />
     </DashboardLayout>
+    </ProtectedRoute>
   );
 }

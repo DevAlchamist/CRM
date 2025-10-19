@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
   Users,
@@ -42,16 +43,43 @@ const adminNavigation = [
 ];
 
 interface SidebarProps {
-  userRole: 'admin' | 'manager' | 'employee';
+  userRole: 'super_admin' | 'admin' | 'manager' | 'employee';
 }
 
 export function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname();
-  const currentUser = demoUsers[0]; // For demo purposes
+  const router = useRouter();
+  const { logout, user, company, isLoading } = useAuth();
+  const currentUser = user || demoUsers[0];
+  
+  // Use the actual user's role from auth state, fallback to prop
+  const actualUserRole = currentUser?.role || userRole;
 
-  const allNavigation = userRole === 'admin' 
-    ? [...navigation, ...adminNavigation]
-    : navigation;
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails, redirect to login
+      router.push('/login');
+    }
+  };
+
+  // Filter base navigation by role
+  const roleFiltered = navigation.filter((item) => {
+    if (actualUserRole === 'super_admin') return true;
+    if (actualUserRole === 'admin') return true;
+    if (actualUserRole === 'manager') {
+      return !['Billing', 'Settings'].includes(item.name);
+    }
+    // employee
+    return ['Dashboard', 'Customers', 'Leads', 'Tasks', 'Messages', 'Calendar', 'Documents'].includes(item.name);
+  });
+
+  const allNavigation = actualUserRole === 'super_admin' 
+    ? [...roleFiltered, ...adminNavigation]
+    : roleFiltered;
 
   return (
     <div className="flex h-screen w-64 flex-col bg-white border-r border-[#E5E7EB]">
@@ -63,7 +91,7 @@ export function Sidebar({ userRole }: SidebarProps) {
           </div>
           <div>
             <h1 className="text-sm font-semibold text-[#111827]">
-              {demoCompany.name}
+              {company?.name || demoCompany.name}
             </h1>
             <p className="text-xs text-[#6B7280]">CRM Platform</p>
           </div>
@@ -96,7 +124,7 @@ export function Sidebar({ userRole }: SidebarProps) {
       <div className="border-t border-[#E5E7EB] p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={currentUser.avatar} />
+            <AvatarImage src={undefined} />
             <AvatarFallback>
               {currentUser.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
@@ -109,8 +137,19 @@ export function Sidebar({ userRole }: SidebarProps) {
               {currentUser.email}
             </p>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <LogOut className="h-4 w-4" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={handleLogout}
+            disabled={isLoading}
+            title="Logout"
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>

@@ -116,33 +116,6 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-[#E5E7EB]">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-md bg-[#2563EB] flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-[#111827]">CRM Pro</span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-[#6B7280] hover:text-[#111827]">Home</Link>
-              <Link href="/features" className="text-[#6B7280] hover:text-[#111827]">Features</Link>
-              <Link href="/pricing" className="text-[#6B7280] hover:text-[#111827]">Pricing</Link>
-              <Link href="/resources" className="text-[#2563EB] hover:text-[#1E40AF]">Resources</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Get Started</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-[#F9FAFB] to-white">

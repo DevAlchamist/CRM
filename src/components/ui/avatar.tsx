@@ -20,17 +20,31 @@ Avatar.displayName = "Avatar";
 const AvatarImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, width, height, src, ...props }, ref) => (
-  <Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full object-cover", className)}
-    alt=""
-    src={typeof src === 'string' ? src : "/placeholder-avatar.png"}
-    width={width ? Number(width) : 40}
-    height={height ? Number(height) : 40}
-    {...props}
-  />
-));
+>(({ className, width, height, src, onError, ...props }, ref) => {
+  const [hasError, setHasError] = React.useState(false);
+  const resolvedSrc = typeof src === 'string' && src ? src : undefined;
+
+  if (hasError || !resolvedSrc) {
+    // Hide image so AvatarFallback (initials) can show
+    return null;
+  }
+
+  return (
+    <Image
+      ref={ref}
+      className={cn("aspect-square h-full w-full object-cover", className)}
+      alt=""
+      src={resolvedSrc}
+      width={width ? Number(width) : 40}
+      height={height ? Number(height) : 40}
+      onError={(e) => {
+        setHasError(true);
+        onError?.(e as unknown as React.SyntheticEvent<HTMLImageElement, Event>);
+      }}
+      {...props}
+    />
+  );
+});
 AvatarImage.displayName = "AvatarImage";
 
 const AvatarFallback = React.forwardRef<

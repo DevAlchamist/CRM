@@ -3,10 +3,12 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  role: 'admin' | 'manager' | 'employee';
+  role: 'super_admin' | 'admin' | 'manager' | 'employee';
   companyId: string;
   phone?: string;
   department?: string;
+  managerId?: string; // ID of the manager this employee reports to
+  managerName?: string; // Cached manager name for display
   createdAt: Date;
   lastLoginAt?: Date;
   isActive: boolean;
@@ -43,13 +45,21 @@ export interface Customer {
 export interface Lead {
   id: string;
   title: string;
-  customerId: string;
-  customerName: string;
+  customerId?: string; // Optional - allows leads without customers (prospects)
+  customerName?: string;
   value: number;
   stage: 'prospect' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
   probability: number;
   assignedTo: string;
   assignedToName: string;
+  assignedUser?: {
+    id: string;
+    name: string;
+    role: 'super_admin' | 'admin' | 'manager' | 'employee';
+    email: string;
+    department?: string;
+    avatar?: string;
+  };
   source: string;
   createdAt: Date;
   updatedAt: Date;

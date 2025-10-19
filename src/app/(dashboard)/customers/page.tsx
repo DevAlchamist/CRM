@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,20 +22,68 @@ import {
   Edit,
   Trash2
 } from 'lucide-react';
-import { demoCustomers } from '@/data/demo';
+import api from '@/lib/api';
 import { formatCurrency, formatDate, getStatusColor, getInitials } from '@/lib/utils';
 import { Customer } from '@/types';
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState(demoCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
-  const totalValue = customers.reduce((sum, customer) => sum + customer.totalValue, 0);
-  const activeCustomers = customers.filter(c => c.status === 'active').length;
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCustomers = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const params = new URLSearchParams();
+        params.append('page', String(page));
+        params.append('limit', String(limit));
+        if (search) params.append('search', search);
+        if (statusFilter) params.append('status', statusFilter);
+        const { body } = await api.get(`customers?${params.toString()}`);
+        const data = body as any;
+        const list = (data?.result?.data || data?.data || []) as any[];
+        const normalized: Customer[] = list.map((c) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone ?? '',
+          company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+          status: c.status ?? 'active',
+          source: c.source ?? 'website',
+          tags: c.tags ?? [],
+          totalValue: c.totalValue ?? 0,
+          createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+          lastContactAt: c.lastContactAt ? new Date(c.lastContactAt) : new Date(),
+          notes: c.notes ?? '',
+          avatar: c.avatar,
+        }));
+        if (!cancelled) setCustomers(normalized);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || 'Failed to load customers');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    fetchCustomers();
+    return () => {
+      cancelled = true;
+    };
+  }, [page, limit, search, statusFilter]);
+
+  const totalValue = useMemo(() => customers.reduce((sum, customer) => sum + (customer.totalValue || 0), 0), [customers]);
+  const activeCustomers = useMemo(() => customers.filter(c => c.status === 'active').length, [customers]);
 
   const handleViewCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -52,7 +100,7 @@ export default function CustomersPage() {
     setDeleteModalOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Partial<Customer>) => {
+  const handleSaveCustomer = async (customerData: Partial<Customer>) => {
     if (selectedCustomer) {
       // Edit existing customer
       setCustomers(customers.map(c => 
@@ -62,29 +110,73 @@ export default function CustomersPage() {
       ));
     } else {
       // Add new customer
-      const newCustomer: Customer = {
-        id: Date.now().toString(),
-        name: customerData.name || '',
-        email: customerData.email || '',
-        phone: customerData.phone || '',
-        company: customerData.company || '',
-        status: 'active',
-        source: 'website',
-        tags: customerData.tags || [],
-        totalValue: 0,
-        createdAt: new Date(),
-        lastContactAt: new Date(),
-        notes: customerData.notes || '',
-      };
-      setCustomers([...customers, newCustomer]);
+      try {
+        const payload = {
+          name: customerData.name || '',
+          email: customerData.email || '',
+          phone: customerData.phone || '',
+          status: customerData.status || 'active',
+          source: customerData.source || 'website',
+          tags: customerData.tags || [],
+          ownerId: (customerData as any).ownerId,
+        };
+
+        const { body } = await api.post('customers', { json: payload });
+        const data = body as any;
+        const c = (data?.result?.customer || data?.result || data) as any;
+
+        const created: Customer = {
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone ?? '',
+          company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+          status: c.status ?? 'active',
+          source: c.source ?? 'website',
+          tags: c.tags ?? [],
+          totalValue: c.totalValue ?? 0,
+          createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+          lastContactAt: c.lastContactAt ? new Date(c.lastContactAt) : new Date(),
+          notes: c.notes ?? '',
+          avatar: c.avatar,
+        };
+
+        setCustomers([...customers, created]);
+      } catch (e) {
+        console.error('Failed to create customer', e);
+      }
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedCustomer) {
-      setCustomers(customers.filter(c => c.id !== selectedCustomer.id));
-      setSelectedCustomer(null);
+      try {
+        // Check for related leads and tasks before deleting
+        const { body: leadsResponse } = await api.get(`leads?customerId=${selectedCustomer.id}`);
+        const leadsData = leadsResponse as any;
+        const relatedLeads = (leadsData?.result?.data || leadsData?.data || []) as any[];
+        
+        const { body: tasksResponse } = await api.get(`tasks?relatedToType=customer&relatedToId=${selectedCustomer.id}`);
+        const tasksData = tasksResponse as any;
+        const relatedTasks = (tasksData?.result?.data || tasksData?.data || []) as any[];
+
+        if (relatedLeads.length > 0 || relatedTasks.length > 0) {
+          const message = `This customer has ${relatedLeads.length} leads and ${relatedTasks.length} tasks. Deleting will also remove these related records. Are you sure?`;
+          if (!confirm(message)) {
+            return;
+          }
+        }
+
+        await api.delete(`customers/${selectedCustomer.id}`);
+        setCustomers(customers.filter(c => c.id !== selectedCustomer.id));
+        addToast('Customer and related records deleted successfully', 'success');
+      } catch (error: any) {
+        console.error('Failed to delete customer:', error);
+        addToast('Failed to delete customer', 'error');
+      }
     }
+    setDeleteModalOpen(false);
+    setSelectedCustomer(null);
   };
 
   return (
@@ -101,7 +193,7 @@ export default function CustomersPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-[#111827]">
-                {demoCustomers.length}
+                {customers.length}
               </div>
             </CardContent>
           </Card>
@@ -161,6 +253,9 @@ export default function CustomersPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+            )}
             {/* Search */}
             <div className="flex items-center space-x-2 mb-6">
               <div className="relative flex-1 max-w-sm">
@@ -168,13 +263,22 @@ export default function CustomersPage() {
                 <Input
                   placeholder="Search customers..."
                   className="pl-10"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
                 />
               </div>
             </div>
 
             {/* Customers Table */}
             <div className="space-y-4">
-              {customers.map((customer) => (
+              {isLoading ? (
+                <div className="text-sm text-[#6B7280]">Loading customers...</div>
+              ) : customers.length === 0 ? (
+                <div className="text-sm text-[#6B7280]">No customers found.</div>
+              ) : customers.map((customer) => (
                 <div
                   key={customer.id}
                   className="flex items-center space-x-4 p-4 border border-[#E5E7EB] rounded-lg hover:bg-[#F9FAFB] transition-colors"

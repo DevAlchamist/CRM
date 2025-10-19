@@ -4,28 +4,38 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
-import { Building2, Mail, Phone, MapPin, Clock, MessageCircle, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, MessageSquare, HelpCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     company: '',
+    phone: '',
     subject: '',
-    message: '',
-    inquiryType: 'general'
+    message: ''
   });
+
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
+    // Handle form submission here
+    console.log('Form submitted:', formData);
+    setIsSubmitted(true);
+    
+    // Reset form after 3 seconds
     setTimeout(() => {
-      setIsSubmitted(true);
-    }, 1000);
+      setFormData({
+        name: '',
+        email: '',
+        company: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+      setIsSubmitted(false);
+    }, 3000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -38,148 +48,109 @@ export default function ContactPage() {
   const contactMethods = [
     {
       icon: Mail,
-      title: 'Email Support',
-      description: 'Get help from our support team',
-      contact: 'support@crmpro.com',
-      responseTime: 'Within 24 hours'
+      title: 'Email Us',
+      description: 'Our team will respond within 24 hours',
+      contact: 'contact@crmplatform.com',
+      link: 'mailto:contact@crmplatform.com'
     },
     {
       icon: Phone,
-      title: 'Phone Support',
-      description: 'Speak with our sales team',
+      title: 'Call Us',
+      description: 'Mon-Fri from 8am to 6pm EST',
       contact: '+1 (555) 123-4567',
-      responseTime: 'Mon-Fri, 9AM-6PM EST'
+      link: 'tel:+15551234567'
     },
     {
-      icon: MessageCircle,
+      icon: MessageSquare,
       title: 'Live Chat',
-      description: 'Chat with us instantly',
-      contact: 'Available 24/7',
-      responseTime: 'Immediate'
+      description: 'Available 24/7 for urgent inquiries',
+      contact: 'Start a conversation',
+      link: '#'
+    },
+    {
+      icon: MapPin,
+      title: 'Visit Us',
+      description: 'Come see us in person',
+      contact: '123 Business St, San Francisco, CA 94105',
+      link: '#'
+    }
+  ];
+
+  const departments = [
+    {
+      title: 'Sales',
+      description: 'Interested in our products? Get in touch with our sales team.',
+      email: 'sales@crmplatform.com',
+      icon: '💼'
+    },
+    {
+      title: 'Support',
+      description: 'Need help with your account or have a technical question?',
+      email: 'support@crmplatform.com',
+      icon: '🛟'
+    },
+    {
+      title: 'Partnerships',
+      description: 'Want to partner with us? Let\'s talk about opportunities.',
+      email: 'partners@crmplatform.com',
+      icon: '🤝'
+    },
+    {
+      title: 'Press & Media',
+      description: 'Press inquiries and media requests.',
+      email: 'press@crmplatform.com',
+      icon: '📰'
     }
   ];
 
   const faqs = [
     {
-      question: 'How do I get started with CRM Pro?',
-      answer: 'Simply sign up for a free trial, complete the onboarding wizard, and start adding your customers and leads. Our setup wizard will guide you through the process.'
+      question: 'What is your response time?',
+      answer: 'We typically respond to all inquiries within 24 hours during business days.'
     },
     {
-      question: 'What integrations are available?',
-      answer: 'CRM Pro integrates with popular tools like Gmail, Outlook, Slack, Zoom, Google Calendar, Stripe, and many more. Check our integrations page for the full list.'
+      question: 'Do you offer phone support?',
+      answer: 'Yes, phone support is available for all paid plans Monday through Friday, 8am-6pm EST.'
     },
     {
-      question: 'Can I import my existing customer data?',
-      answer: 'Yes! You can import customers, leads, and contacts from CSV files or directly from other CRM systems. Our import wizard makes this process simple.'
-    },
-    {
-      question: 'Is my data secure?',
-      answer: 'Absolutely. We use enterprise-grade security with data encryption, regular backups, and compliance with industry standards like SOC 2 and GDPR.'
-    },
-    {
-      question: 'Do you offer custom training?',
-      answer: 'Yes, we provide onboarding training for new teams and advanced training for power users. Contact our support team to schedule a session.'
-    },
-    {
-      question: 'Can I cancel my subscription anytime?',
-      answer: 'Yes, you can cancel your subscription at any time. You\'ll continue to have access until the end of your current billing period.'
+      question: 'Can I schedule a demo?',
+      answer: 'Absolutely! You can schedule a personalized demo by filling out the contact form or calling us directly.'
     }
   ];
 
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="border-b border-[#E5E7EB]">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-md bg-[#2563EB] flex items-center justify-center">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-[#111827]">CRM Pro</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Success Message */}
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="max-w-md w-full">
-            <CardContent className="pt-6 text-center">
-              <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-[#111827] mb-2">Message Sent!</h2>
-              <p className="text-[#6B7280] mb-6">
-                Thank you for reaching out. We&apos;ll get back to you within 24 hours.
-              </p>
-              <Button asChild className="w-full">
-                <Link href="/">Return to Home</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-[#E5E7EB]">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-md bg-[#2563EB] flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-[#111827]">CRM Pro</span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-[#6B7280] hover:text-[#111827]">Home</Link>
-              <Link href="/features" className="text-[#6B7280] hover:text-[#111827]">Features</Link>
-              <Link href="/pricing" className="text-[#6B7280] hover:text-[#111827]">Pricing</Link>
-              <Link href="/about" className="text-[#6B7280] hover:text-[#111827]">About</Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Get Started</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-b from-[#F9FAFB] to-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-[#111827] mb-6">
-            Contact Us
+            Get in Touch
           </h1>
           <p className="text-xl text-[#6B7280] mb-8 max-w-3xl mx-auto">
-            Get in touch with our team. We&apos;re here to help you succeed with CRM Pro.
+            Have questions about CRM Pro? We&apos;re here to help. Reach out to our team and we&apos;ll get back to you as soon as possible.
           </p>
         </div>
       </section>
 
       {/* Contact Methods */}
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {contactMethods.map((method, index) => (
-              <Card key={index} className="text-center">
-                <CardContent className="pt-6">
-                  <div className="h-16 w-16 bg-[#2563EB] rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <method.icon className="h-8 w-8 text-white" />
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="h-12 w-12 bg-[#2563EB] rounded-lg flex items-center justify-center mb-4">
+                    <method.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-[#111827] mb-2">{method.title}</h3>
-                  <p className="text-[#6B7280] mb-3">{method.description}</p>
-                  <p className="font-medium text-[#111827] mb-2">{method.contact}</p>
-                  <p className="text-sm text-[#6B7280]">{method.responseTime}</p>
+                  <CardTitle className="text-lg">{method.title}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {method.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <a href={method.link} className="text-[#2563EB] hover:underline font-medium break-words">
+                    {method.contact}
+                  </a>
                 </CardContent>
               </Card>
             ))}
@@ -187,196 +158,238 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Form & Info */}
+      {/* Main Contact Section */}
       <section className="py-20 bg-[#F9FAFB]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Send us a Message</CardTitle>
-                <CardDescription>
-                  Fill out the form below and we&apos;ll get back to you as soon as possible.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Contact Form */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Send us a Message</CardTitle>
+                    <CardDescription>
+                      Fill out the form below and our team will get back to you within 24 hours.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isSubmitted ? (
+                      <div className="text-center py-12">
+                        <CheckCircle2 className="h-16 w-16 text-[#10B981] mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold text-[#111827] mb-2">Message Sent!</h3>
+                        <p className="text-[#6B7280]">Thank you for contacting us. We&apos;ll respond shortly.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-[#111827] mb-2">
+                              Full Name *
+                            </label>
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              required
+                              value={formData.name}
+                              onChange={handleChange}
+                              className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                              placeholder="John Doe"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-[#111827] mb-2">
+                              Email Address *
+                            </label>
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              required
+                              value={formData.email}
+                              onChange={handleChange}
+                              className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                              placeholder="john@company.com"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="company" className="block text-sm font-medium text-[#111827] mb-2">
+                              Company
+                            </label>
+                            <input
+                              type="text"
+                              id="company"
+                              name="company"
+                              value={formData.company}
+                              onChange={handleChange}
+                              className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                              placeholder="Acme Inc."
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-[#111827] mb-2">
+                              Phone Number
+                            </label>
+                            <input
+                              type="tel"
+                              id="phone"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handleChange}
+                              className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                              placeholder="+1 (555) 000-0000"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="subject" className="block text-sm font-medium text-[#111827] mb-2">
+                            Subject *
+                          </label>
+                          <select
+                            id="subject"
+                            name="subject"
+                            required
+                            value={formData.subject}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                          >
+                            <option value="">Select a subject</option>
+                            <option value="sales">Sales Inquiry</option>
+                            <option value="support">Technical Support</option>
+                            <option value="demo">Schedule a Demo</option>
+                            <option value="partnership">Partnership Opportunity</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="message" className="block text-sm font-medium text-[#111827] mb-2">
+                            Message *
+                          </label>
+                          <textarea
+                            id="message"
+                            name="message"
+                            required
+                            value={formData.message}
+                            onChange={handleChange}
+                            rows={6}
+                            className="w-full px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
+                            placeholder="Tell us how we can help you..."
+                          />
+        </div>
+        
+                        <Button type="submit" size="lg" className="w-full">
+                          Send Message
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </form>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Office Hours */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Clock className="h-5 w-5 mr-2" />
+                      Office Hours
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name *
-                      </label>
-                      <Input
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="Your full name"
-                      />
+                      <div className="font-medium text-[#111827]">Monday - Friday</div>
+                      <div className="text-sm text-[#6B7280]">8:00 AM - 6:00 PM EST</div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <Input
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="your@email.com"
-                      />
+                      <div className="font-medium text-[#111827]">Saturday</div>
+                      <div className="text-sm text-[#6B7280]">10:00 AM - 4:00 PM EST</div>
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Company
-                    </label>
-                    <Input
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      placeholder="Your company name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Inquiry Type
-                    </label>
-                    <Select
-                      name="inquiryType"
-                      value={formData.inquiryType}
-                      onChange={handleChange}
-                    >
-                      <option value="general">General Question</option>
-                      <option value="sales">Sales Inquiry</option>
-                      <option value="support">Technical Support</option>
-                      <option value="billing">Billing Question</option>
-                      <option value="partnership">Partnership</option>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject *
-                    </label>
-                    <Input
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                      placeholder="Brief subject line"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
-                    </label>
-                    <Textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={5}
-                      placeholder="Tell us how we can help you..."
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full">
-                    Send Message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Contact Info */}
-            <div className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Office Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="h-5 w-5 text-[#6B7280]" />
                     <div>
-                      <p className="font-medium text-[#111827]">Headquarters</p>
-                      <p className="text-[#6B7280]">
-                        123 Business Avenue<br />
-                        Suite 100<br />
-                        San Francisco, CA 94105
-                      </p>
+                      <div className="font-medium text-[#111827]">Sunday</div>
+                      <div className="text-sm text-[#6B7280]">Closed</div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-[#6B7280]" />
-                    <div>
-                      <p className="font-medium text-[#111827]">Business Hours</p>
-                      <p className="text-[#6B7280]">
-                        Monday - Friday: 9:00 AM - 6:00 PM PST<br />
-                        Saturday: 10:00 AM - 2:00 PM PST<br />
-                        Sunday: Closed
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Links</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Link href="/pricing" className="block text-[#2563EB] hover:underline">
-                      View Pricing Plans
-                    </Link>
-                    <Link href="/features" className="block text-[#2563EB] hover:underline">
-                      Explore Features
-                    </Link>
-                    <Link href="/signup" className="block text-[#2563EB] hover:underline">
-                      Start Free Trial
-                    </Link>
-                    <Link href="/about" className="block text-[#2563EB] hover:underline">
-                      Learn About Us
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* FAQ */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <HelpCircle className="h-5 w-5 mr-2" />
+                      Quick FAQ
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {faqs.map((faq, index) => (
+                      <div key={index}>
+                        <h4 className="font-medium text-[#111827] mb-1">{faq.question}</h4>
+                        <p className="text-sm text-[#6B7280]">{faq.answer}</p>
+              </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Departments Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-[#111827] mb-4">Frequently Asked Questions</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">
+              Contact by Department
+            </h2>
             <p className="text-xl text-[#6B7280] max-w-2xl mx-auto">
-              Quick answers to common questions about CRM Pro
+              Get in touch with the right team for your needs
             </p>
           </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-6">
-              {faqs.map((faq, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6">
-                    <h3 className="text-lg font-semibold text-[#111827] mb-3">
-                      {faq.question}
-                    </h3>
-                    <p className="text-[#6B7280]">
-                      {faq.answer}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {departments.map((dept, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="text-4xl mb-4">{dept.icon}</div>
+                  <CardTitle className="text-lg">{dept.title}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {dept.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <a href={`mailto:${dept.email}`} className="text-[#2563EB] hover:underline font-medium text-sm">
+                    {dept.email}
+                  </a>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-[#2563EB]">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Prefer to talk to sales?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Schedule a personalized demo and see how CRM Pro can transform your business.
+          </p>
+          <Button size="lg" variant="secondary" asChild>
+            <Link href="/pricing">
+              View Pricing
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+      </div>
       </section>
     </div>
   );

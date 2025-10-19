@@ -20,7 +20,7 @@ export const demoUsers: User[] = [
     email: 'admin@techcorp.com',
     name: 'John Smith',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-    role: 'admin',
+    role: 'super_admin',
     companyId: '1',
     createdAt: new Date('2024-01-15'),
     lastLoginAt: new Date('2024-12-01'),

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Search, Bell, Plus, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +12,13 @@ import { demoUsers } from '@/data/demo';
 interface HeaderProps {
   title: string;
   onMenuClick?: () => void;
+  onAddClick?: () => void;
 }
 
-export function Header({ title, onMenuClick }: HeaderProps) {
+export function Header({ title, onMenuClick, onAddClick }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const currentUser = demoUsers[0];
+  const { company } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#E5E7EB] bg-white">
@@ -31,8 +34,9 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
           
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-baseline space-x-2">
             <h1 className="text-xl font-semibold text-[#111827]">{title}</h1>
+            <span className="text-sm text-[#6B7280]">· {company?.name || 'TechCorp Solutions'}</span>
           </div>
         </div>
 
@@ -52,7 +56,8 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Right side */}
         <div className="flex items-center space-x-4">
           {/* Quick Add Button */}
-          <Button className="hidden sm:flex">
+          <Button className="hidden sm:flex" onClick={onAddClick}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add
           </Button>

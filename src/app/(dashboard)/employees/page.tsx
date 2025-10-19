@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,18 +23,87 @@ import {
   Trash2,
   Building2
 } from 'lucide-react';
-import { demoUsers } from '@/data/demo';
 import { formatDate, getInitials } from '@/lib/utils';
 import { User as UserType } from '@/types';
+import api from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useToast } from '@/components/ui/toast';
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState(demoUsers);
+  const { user } = useAuth();
+  const { hasRole, can } = usePermissions();
+  const { addToast } = useToast();
+  
+  const [employees, setEmployees] = useState<UserType[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<UserType | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check permissions once outside useEffect to avoid infinite loops
+  const isManagerOnly = hasRole('manager') && !hasRole('admin');
+  const canAssignUsers = hasRole('admin') || hasRole('manager');
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchEmployees = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Build query parameters based on user role
+        const params = new URLSearchParams();
+        params.append('roles', 'employee,manager,admin');
+        
+        // If user is a manager, only show employees assigned to them
+        if (isManagerOnly) {
+          params.append('managerId', user?.id || '');
+        }
+        // Admins see everyone (no additional filter)
+        
+        const { body } = await api.get(`users?${params.toString()}`);
+        console.log('Raw API response:', body);
+        
+        // Expecting body to be { error, message, result: { data: [...] } }
+        const data = body as any;
+        const list = (data?.result?.data || data?.data || []) as any[];
+        console.log('Employee list from API:', list);
+        
+        const normalized: UserType[] = list.map((u) => ({
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          companyId: u.companyId,
+          isActive: u.isActive ?? true,
+          avatar: u.avatar,
+          phone: u.phone,
+          department: u.department,
+          managerId: u.managerId,
+          managerName: u.managerName,
+          createdAt: u.createdAt ? new Date(u.createdAt) : new Date(),
+          lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt) : undefined,
+        }));
+        
+        console.log('Normalized employees:', normalized);
+        if (!cancelled) setEmployees(normalized);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || 'Failed to load employees');
+        addToast('Failed to load employees', 'error');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    fetchEmployees();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, isManagerOnly]);
 
   const totalEmployees = employees.length;
   const activeEmployees = employees.filter(user => user.isActive).length;
@@ -55,37 +124,96 @@ export default function EmployeesPage() {
     setDeleteModalOpen(true);
   };
 
-  const handleSaveEmployee = (employeeData: Partial<UserType>) => {
-    if (selectedEmployee) {
-      // Edit existing employee
-      setEmployees(employees.map(e => 
-        e.id === selectedEmployee.id 
-          ? { ...e, ...employeeData }
-          : e
-      ));
-    } else {
-      // Add new employee
-      const newEmployee: UserType = {
-        id: Date.now().toString(),
-        name: employeeData.name || '',
-        email: employeeData.email || '',
-        role: employeeData.role || 'employee',
-        companyId: 'company-1', // Default company ID
-        isActive: employeeData.isActive ?? true,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${employeeData.name}`,
-        phone: employeeData.phone || '',
-        department: employeeData.department || '',
-        createdAt: new Date(),
-        lastLoginAt: undefined,
-      };
-      setEmployees([...employees, newEmployee]);
+  const handleSaveEmployee = async (employeeData: Partial<UserType>) => {
+    try {
+      console.log('Saving employee data:', employeeData);
+      
+      if (selectedEmployee) {
+        // Edit existing employee
+        console.log('Updating employee:', selectedEmployee.id, 'with data:', employeeData);
+        const response = await api.patch(`users/${selectedEmployee.id}`, { json: employeeData });
+        console.log('Update response:', response);
+        
+        const updatedEmployee = response.body?.result?.user || response.body?.user;
+        
+        if (updatedEmployee) {
+          console.log('Updated employee from backend:', updatedEmployee);
+          setEmployees(employees.map(e => 
+            e.id === selectedEmployee.id 
+              ? { ...e, ...employeeData, ...updatedEmployee }
+              : e
+          ));
+          addToast('Employee updated successfully', 'success');
+        } else {
+          // Fallback to local update
+          console.log('Using fallback update with data:', employeeData);
+          setEmployees(employees.map(e => 
+            e.id === selectedEmployee.id 
+              ? { ...e, ...employeeData }
+              : e
+          ));
+          addToast('Employee updated successfully (local update)', 'success');
+        }
+      } else {
+        // Add new employee
+        console.log('Creating new employee with data:', employeeData);
+        const response = await api.post('users', { json: employeeData });
+        console.log('Create response:', response);
+        
+        const newEmployee = response.body?.result?.user || response.body?.user;
+        
+        if (newEmployee) {
+          console.log('New employee from backend:', newEmployee);
+          setEmployees([...employees, {
+            ...newEmployee,
+            id: newEmployee.id || Date.now().toString(),
+            createdAt: newEmployee.createdAt ? new Date(newEmployee.createdAt) : new Date(),
+            lastLoginAt: newEmployee.lastLoginAt ? new Date(newEmployee.lastLoginAt) : undefined,
+          }]);
+          addToast('Employee created successfully', 'success');
+        } else {
+          // Fallback to local creation
+          console.log('Using fallback creation with data:', employeeData);
+          const fallbackEmployee: UserType = {
+            id: Date.now().toString(),
+            name: employeeData.name || '',
+            email: employeeData.email || '',
+            role: employeeData.role || 'employee',
+            companyId: user?.companyId || 'company-1',
+            isActive: employeeData.isActive ?? true,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${employeeData.name}`,
+            phone: employeeData.phone || '',
+            department: employeeData.department || '',
+            managerId: employeeData.managerId,
+            managerName: employeeData.managerName,
+            createdAt: new Date(),
+            lastLoginAt: undefined,
+          };
+          setEmployees([...employees, fallbackEmployee]);
+          addToast('Employee created successfully (local creation)', 'success');
+        }
+      }
+    } catch (error: any) {
+      console.error('Failed to save employee:', error);
+      console.error('Error details:', error.response || error.message);
+      addToast(`Failed to save employee: ${error.message || 'Unknown error'}`, 'error');
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (selectedEmployee) {
-      setEmployees(employees.filter(e => e.id !== selectedEmployee.id));
-      setSelectedEmployee(null);
+      try {
+        await api.delete(`users/${selectedEmployee.id}`);
+        setEmployees(employees.filter(e => e.id !== selectedEmployee.id));
+        setSelectedEmployee(null);
+        addToast('Employee deleted successfully', 'success');
+      } catch (error: any) {
+        console.error('Failed to delete employee:', error);
+        addToast('Failed to delete employee', 'error');
+        // Still remove from UI as fallback
+        setEmployees(employees.filter(e => e.id !== selectedEmployee.id));
+        setSelectedEmployee(null);
+      }
     }
   };
   const managerCount = employees.filter(user => user.role === 'manager').length;
@@ -182,9 +310,14 @@ export default function EmployeesPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div>
-                <CardTitle>Team Members</CardTitle>
+                <CardTitle>
+                  {hasRole('admin') ? 'Company Team' : 'Team Members'}
+                </CardTitle>
                 <CardDescription>
-                  Manage your team members and their roles
+                  {hasRole('admin') 
+                    ? 'Manage all employees, managers, and organizational structure'
+                    : 'Manage your team members and their assignments'
+                  }
                 </CardDescription>
               </div>
               <div className="flex space-x-2">
@@ -192,17 +325,22 @@ export default function EmployeesPage() {
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button onClick={() => {
-                  setSelectedEmployee(null);
-                  setAddModalOpen(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Invite Employee
-                </Button>
+                {can('create_employee') && (
+                  <Button onClick={() => {
+                    setSelectedEmployee(null);
+                    setAddModalOpen(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {hasRole('admin') ? 'Add Team Member' : 'Add Employee'}
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+            )}
             {/* Search */}
             <div className="flex items-center space-x-2 mb-6">
               <div className="relative flex-1 max-w-sm">
@@ -218,7 +356,11 @@ export default function EmployeesPage() {
 
             {/* Employees List */}
             <div className="space-y-4">
-              {filteredEmployees.map((employee) => {
+              {isLoading ? (
+                <div className="text-sm text-[#6B7280]">Loading employees...</div>
+              ) : filteredEmployees.length === 0 ? (
+                <div className="text-sm text-[#6B7280]">No employees found.</div>
+              ) : filteredEmployees.map((employee) => {
                 const RoleIcon = getRoleIcon(employee.role);
                 return (
                   <div
@@ -259,6 +401,12 @@ export default function EmployeesPage() {
                           <Calendar className="h-3 w-3" />
                           <span>Joined {formatDate(employee.createdAt)}</span>
                         </div>
+                        {employee.managerName && (
+                          <div className="flex items-center space-x-1 text-xs text-[#6B7280]">
+                            <User className="h-3 w-3" />
+                            <span>Reports to {employee.managerName}</span>
+                          </div>
+                        )}
                         {employee.lastLoginAt && (
                           <div className="flex items-center space-x-1 text-xs text-[#6B7280]">
                             <User className="h-3 w-3" />
@@ -277,22 +425,26 @@ export default function EmployeesPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleEditEmployee(employee)}
-                        title="Edit Employee"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleDeleteEmployee(employee)}
-                        title="Delete Employee"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {can('edit_employee') && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleEditEmployee(employee)}
+                          title="Edit Employee"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {can('delete_employee') && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDeleteEmployee(employee)}
+                          title="Delete Employee"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -399,64 +551,7 @@ export default function EmployeesPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Employee Activity</CardTitle>
-            <CardDescription>Latest actions and updates from your team</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  user: 'Sarah Johnson',
-                  action: 'Updated customer profile',
-                  target: 'Acme Corporation',
-                  time: '2 minutes ago',
-                  avatar: demoUsers[1].avatar,
-                },
-                {
-                  user: 'Mike Wilson',
-                  action: 'Created new lead',
-                  target: 'Startup Package Deal',
-                  time: '15 minutes ago',
-                  avatar: demoUsers[2].avatar,
-                },
-                {
-                  user: 'John Smith',
-                  action: 'Completed task',
-                  target: 'Follow up with Acme Corp',
-                  time: '1 hour ago',
-                  avatar: demoUsers[0].avatar,
-                },
-                {
-                  user: 'Sarah Johnson',
-                  action: 'Added note to lead',
-                  target: 'Enterprise CRM Implementation',
-                  time: '2 hours ago',
-                  avatar: demoUsers[1].avatar,
-                },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center space-x-4 p-3 hover:bg-[#F9FAFB] rounded-lg transition-colors">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={activity.avatar} />
-                    <AvatarFallback>
-                      {getInitials(activity.user)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#111827]">
-                      <span className="font-medium">{activity.user}</span>{' '}
-                      {activity.action}{' '}
-                      <span className="font-medium">{activity.target}</span>
-                    </p>
-                    <p className="text-xs text-[#6B7280]">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Recent Activity removed: demo data only */}
       </div>
 
       {/* Modals */}

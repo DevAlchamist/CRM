@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -164,8 +165,10 @@ export default function AdminPage() {
     { plan: 'Enterprise', count: 10, revenue: 1990 },
   ];
 
+  const userRole = useUserRole();
+
   return (
-    <DashboardLayout title="Super Admin Panel" userRole="admin">
+    <DashboardLayout title="Super Admin Panel" userRole={userRole}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-2 mb-6">

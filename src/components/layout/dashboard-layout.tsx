@@ -7,13 +7,15 @@ import { Header } from './header';
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
-  userRole?: 'admin' | 'manager' | 'employee';
+  userRole?: 'super_admin' | 'admin' | 'manager' | 'employee';
+  onAddClick?: () => void;
 }
 
 export function DashboardLayout({ 
   children, 
   title, 
-  userRole = 'admin' 
+  userRole = 'admin',
+  onAddClick
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -36,7 +38,7 @@ export function DashboardLayout({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title={title} onMenuClick={() => setSidebarOpen(true)} />
+        <Header title={title} onMenuClick={() => setSidebarOpen(true)} onAddClick={onAddClick} />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-4 py-6">
             {children}

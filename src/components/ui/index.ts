@@ -23,6 +23,9 @@ export { Breadcrumb } from './breadcrumb';
 // Feedback Components
 export { Notification, NotificationProvider, useNotifications } from './notification';
 export { Spinner, LoadingSpinner } from './spinner';
+export { ToastProvider, useToast } from './toast';
+export type { Toast, ToastType } from './toast';
+export { PermissionMessage, InlinePermissionMessage } from './permission-message';
 
 // Layout Components
 export { DashboardLayout } from '../layout/dashboard-layout';

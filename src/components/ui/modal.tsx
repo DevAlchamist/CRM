@@ -35,7 +35,7 @@ export function Modal({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-white/10 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       
@@ -79,7 +79,7 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: 'default' | 'destructive';
@@ -98,7 +98,7 @@ export function ConfirmModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div className="space-y-4">
-        <p className="text-gray-600">{message}</p>
+        <div className="text-gray-600">{message}</div>
         <div className="flex justify-end space-x-3">
           <Button variant="outline" onClick={onClose}>
             {cancelText}

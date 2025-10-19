@@ -1,13 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Lead } from '@/types';
-// import { getInitials } from '@/lib/utils';
+import { Select } from '@/components/ui/select';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Lead, Customer } from '@/types';
+import api from '@/lib/api';
+
+interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface ViewLeadModalProps {
   isOpen: boolean;
@@ -124,8 +132,14 @@ interface AddEditLeadModalProps {
 }
 
 export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadModalProps) {
+  const { can } = usePermissions();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
+  const hasFetchedData = React.useRef(false);
   const [formData, setFormData] = useState({
     title: lead?.title || '',
+    customerId: lead?.customerId || '',
     customerName: lead?.customerName || '',
     value: lead?.value || 0,
     stage: lead?.stage || 'prospect',
@@ -133,7 +147,74 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
     source: lead?.source || '',
     expectedCloseDate: lead?.expectedCloseDate?.toISOString().split('T')[0] || '',
     description: lead?.description || '',
+    assignedTo: lead?.assignedTo || '',
+    assignedToName: lead?.assignedToName || '',
   });
+
+  // Fetch customers and employees when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    // Only fetch once - cache the data
+    if (hasFetchedData.current) return;
+    
+    const fetchData = async () => {
+      // Prevent multiple simultaneous calls
+      if (isLoadingCustomers) return;
+      
+      hasFetchedData.current = true;
+      
+      try {
+        setIsLoadingCustomers(true);
+          
+          // Fetch customers
+          const { body } = await api.get('customers?limit=100');
+          const data = body as any;
+          const list = (data?.result?.data || data?.data || []) as any[];
+          const normalized: Customer[] = list.map((c) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone ?? '',
+            company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+            status: c.status ?? 'active',
+            source: c.source ?? 'website',
+            tags: c.tags ?? [],
+            totalValue: c.totalValue ?? 0,
+            createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+            lastContactAt: c.lastContactAt ? new Date(c.lastContactAt) : new Date(),
+            notes: c.notes ?? '',
+            avatar: c.avatar,
+          }));
+          setCustomers(normalized);
+
+          // Fetch employees (if user has permission)
+          if (can('assign_lead')) {
+            try {
+              const { body: employeesBody } = await api.get('users?limit=100');
+              const employeesData = employeesBody as any;
+              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as any[];
+              const normalizedEmployees: Employee[] = employeesList.map((e) => ({
+                id: e.id,
+                name: e.name,
+                email: e.email,
+                role: e.role,
+              }));
+              setEmployees(normalizedEmployees);
+            } catch (e) {
+              console.error('Failed to fetch employees', e);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch data', e);
+        } finally {
+          setIsLoadingCustomers(false);
+        }
+      };
+      
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const stages = [
     { value: 'prospect', label: 'Prospect' },
@@ -176,13 +257,30 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Customer Name *
+              Customer
             </label>
-            <Input
-              value={formData.customerName}
-              onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-              required
-            />
+            <select
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.customerId}
+              onChange={(e) => {
+                const selectedCustomer = customers.find(c => c.id === e.target.value);
+                setFormData({ 
+                  ...formData, 
+                  customerId: e.target.value,
+                  customerName: selectedCustomer?.name || ''
+                });
+              }}
+              disabled={isLoadingCustomers}
+            >
+              <option value="">
+                {isLoadingCustomers ? 'Loading customers...' : 'Select a customer (optional)'}
+              </option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name} ({customer.email})
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -242,6 +340,35 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
               onChange={(e) => setFormData({ ...formData, expectedCloseDate: e.target.value })}
             />
           </div>
+          {/* Assigned To - Only show if user has permission */}
+          {can('assign_lead') && (
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Assigned To
+              </label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.assignedTo}
+                onChange={(e) => {
+                  const selectedEmployee = employees.find(emp => emp.id === e.target.value);
+                  setFormData({ 
+                    ...formData, 
+                    assignedTo: e.target.value,
+                    assignedToName: selectedEmployee?.name || ''
+                  });
+                }}
+              >
+                <option value="">
+                  {isLoadingCustomers ? 'Loading...' : 'Select team member'}
+                </option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} ({employee.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div>
