@@ -16,7 +16,6 @@ import {
   Filter, 
   DollarSign, 
   Calendar, 
-  User,
   TrendingUp,
   Target,
   Eye,
@@ -28,7 +27,7 @@ import {
 // Using HTML5 drag and drop API instead of external library
 import api from '@/lib/api';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
-import { Lead } from '@/types';
+import { Lead, User, Task } from '@/types';
 
 const stages = [
   { id: 'prospect', name: 'Prospect', color: 'bg-yellow-100 text-yellow-800' },
@@ -39,156 +38,6 @@ const stages = [
   { id: 'closed_lost', name: 'Closed Lost', color: 'bg-red-100 text-red-800' },
 ];
 
-// Draggable Lead Component
-interface DraggableLeadProps {
-  lead: Lead;
-  onView: (lead: Lead) => void;
-  onEdit: (lead: Lead) => void;
-  onDelete: (lead: Lead) => void;
-  onAssign: (lead: Lead) => void;
-}
-
-function DraggableLead({ lead, onView, onEdit, onDelete, onAssign }: DraggableLeadProps) {
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleDragStart = (e: React.DragEvent) => {
-    setIsDragging(true);
-    e.dataTransfer.setData('application/json', JSON.stringify({ leadId: lead.id, lead }));
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
-
-  return (
-    <div
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className={`bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow h-full ${
-        isDragging ? 'opacity-50 shadow-lg' : ''
-      }`}
-    >
-      <div className="space-y-3 h-full flex flex-col">
-        {/* Header with title and drag handle */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-gray-900 truncate">
-              {lead.title}
-            </h4>
-            <p className="text-xs text-gray-500 mt-1 truncate">
-              {lead.customerName || 'No customer (Prospect)'}
-            </p>
-          </div>
-          <GripVertical className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
-        </div>
-
-        {/* Assigned user and value */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={lead.assignedUser?.avatar} />
-              <AvatarFallback className="text-xs">
-                {lead.assignedUser?.name ? getInitials(lead.assignedUser.name) : 
-                 lead.assignedToName ? getInitials(lead.assignedToName) : 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs text-gray-900 font-medium truncate">
-                {lead.assignedUser?.name || lead.assignedToName || 'Unassigned'}
-              </span>
-              {lead.assignedUser?.role && (
-                <span className="text-xs text-gray-500 capitalize">
-                  {lead.assignedUser.role}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="text-right flex-shrink-0">
-            <p className="text-sm font-semibold text-gray-900">
-              {formatCurrency(lead.value)}
-            </p>
-            <p className="text-xs text-gray-500">
-              {lead.probability}% chance
-            </p>
-          </div>
-        </div>
-
-        {/* Due date and source */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center space-x-1 min-w-0">
-            <Calendar className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate">Due {formatDate(lead.expectedCloseDate)}</span>
-          </div>
-          <div className="flex items-center space-x-1 flex-shrink-0">
-            <User className="h-3 w-3" />
-            <span className="truncate">{lead.source}</span>
-          </div>
-        </div>
-
-        {/* Description */}
-        {lead.description && (
-          <p className="text-xs text-gray-500 line-clamp-2 flex-shrink-0">
-            {lead.description}
-          </p>
-        )}
-
-        {/* Action buttons */}
-        <div className="flex items-center justify-end space-x-1 pt-2 border-t mt-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(lead);
-            }}
-            title="View Lead"
-          >
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAssign(lead);
-            }}
-            title="Assign Lead"
-          >
-            <UserPlus className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(lead);
-            }}
-            title="Edit Lead"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(lead);
-            }}
-            title="Delete Lead"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // Table Row Component
 interface TableRowProps {
@@ -202,6 +51,7 @@ interface TableRowProps {
 
 function TableRow({ lead, stages, onView, onEdit, onDelete, onAssign }: TableRowProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isOver, setIsOver] = useState<{ [key: string]: boolean }>({});
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -269,22 +119,21 @@ function TableRow({ lead, stages, onView, onEdit, onDelete, onAssign }: TableRow
         {/* Stage Columns */}
         {stages.map((stage) => {
           const isCurrentStage = lead.stage === stage.id;
-          const [isOver, setIsOver] = useState(false);
 
           const handleDragOver = (e: React.DragEvent) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            setIsOver(true);
+            setIsOver(prev => ({ ...prev, [stage.id]: true }));
           };
 
           const handleDragLeave = (e: React.DragEvent) => {
             e.preventDefault();
-            setIsOver(false);
+            setIsOver(prev => ({ ...prev, [stage.id]: false }));
           };
 
           const handleDrop = (e: React.DragEvent) => {
             e.preventDefault();
-            setIsOver(false);
+            setIsOver(prev => ({ ...prev, [stage.id]: false }));
             
             try {
               const data = JSON.parse(e.dataTransfer.getData('application/json'));
@@ -312,7 +161,7 @@ function TableRow({ lead, stages, onView, onEdit, onDelete, onAssign }: TableRow
               className={`p-4 border-r border-gray-100 last:border-r-0 min-h-[120px] flex items-center justify-center transition-all duration-200 ${
                 isCurrentStage 
                   ? 'bg-blue-50 border-l-4 border-l-blue-400 cursor-grab active:cursor-grabbing' 
-                  : isOver 
+                  : isOver[stage.id] 
                     ? 'bg-green-50 border-2 border-green-300 scale-105 shadow-md' 
                     : 'hover:bg-gray-50 hover:border-gray-300'
               } ${isCurrentStage && isDragging ? 'opacity-60 shadow-xl border-blue-400 scale-105' : ''}`}
@@ -332,12 +181,12 @@ function TableRow({ lead, stages, onView, onEdit, onDelete, onAssign }: TableRow
               ) : (
                 <div className="text-center">
                   <div className="text-xs text-gray-400 mb-1">
-                    {isOver ? '🎯' : '📁'}
+                    {isOver[stage.id] ? '🎯' : '📁'}
                   </div>
                   <div className={`text-xs font-medium transition-colors ${
-                    isOver ? 'text-green-600' : 'text-gray-400'
+                    isOver[stage.id] ? 'text-green-600' : 'text-gray-400'
                   }`}>
-                    {isOver ? 'Drop to Move' : 'Drop here'}
+                    {isOver[stage.id] ? 'Drop to Move' : 'Drop here'}
                   </div>
                 </div>
               )}
@@ -438,23 +287,23 @@ export default function LeadsPage() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [stageFilter, setStageFilter] = useState<string | undefined>(undefined);
-  const [page, setPage] = useState(1);
+  const [search] = useState('');
+  const [stageFilter] = useState<string | undefined>(undefined);
+  const [page] = useState(1);
   const [limit] = useState(20);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   // Check permission once outside useEffect to avoid infinite loops
-  const canViewAll = can('view_all_tasks');
+  const canViewAll = can('view_all_tasks'); 
 
   // Fetch users (employees and managers) for assignment
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const { body } = await api.get('users?roles=employee,manager');
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: User[] }; data?: User[] };
+        const list = (data?.result?.data || data?.data || []) as User[];
         setUsers(list);
       } catch (e) {
         console.error('Failed to fetch users', e);
@@ -482,8 +331,8 @@ export default function LeadsPage() {
         }
         
         const { body } = await api.get(`leads?${params.toString()}`);
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: Lead[] }; data?: Lead[] };
+        const list = (data?.result?.data || data?.data || []) as Lead[];
         const normalized: Lead[] = list.map((l) => ({
           id: l.id,
           title: l.title,
@@ -518,8 +367,8 @@ export default function LeadsPage() {
         }
         
         if (!cancelled) setLeads(filteredLeads);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load leads');
+      } catch (e: unknown) {
+        if (!cancelled) setError((e as Error)?.message || 'Failed to load leads');
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -541,7 +390,7 @@ export default function LeadsPage() {
   useEffect(() => {
     const handleLeadDropped = async (event: Event) => {
       const customEvent = event as CustomEvent;
-      const { leadId, lead, newStage } = customEvent.detail;
+      const { leadId, newStage } = customEvent.detail;
       
       // Find the lead being moved
       const leadToUpdate = leads.find(l => l.id === leadId);
@@ -550,7 +399,7 @@ export default function LeadsPage() {
       // Update the lead's stage optimistically
       const updatedLeads = leads.map(l => 
         l.id === leadId 
-          ? { ...l, stage: newStage as any }
+          ? { ...l, stage: newStage as Lead['stage'] }
           : l
       );
       setLeads(updatedLeads);
@@ -614,8 +463,8 @@ export default function LeadsPage() {
         const { body } = await api.post(`leads/${selectedLead.id}/assign`, {
           json: { assignedTo: selectedUserId }
         });
-        const data = body as any;
-        const updatedLead = (data?.result?.lead || data?.result || data) as any;
+        const data = body as { result?: { lead?: Lead; data?: Lead[] }; data?: Lead[] };
+        const updatedLead = (data?.result?.lead || data?.result || data) as Lead;
 
         // Get assigned user details
         const assignedUser = users.find(u => u.id === selectedUserId);
@@ -666,8 +515,8 @@ export default function LeadsPage() {
         };
 
         const { body } = await api.patch(`leads/${selectedLead.id}`, { json: payload });
-        const data = body as any;
-        const updatedLead = (data?.result?.lead || data?.result || data) as any;
+        const data = body as { result?: { lead?: Lead; data?: Lead[] }; data?: Lead[] };
+        const updatedLead = (data?.result?.lead || data?.result || data) as Lead;
 
         const normalized: Lead = {
           id: updatedLead.id,
@@ -711,8 +560,8 @@ export default function LeadsPage() {
         };
 
         const { body } = await api.post('leads', { json: payload });
-        const data = body as any;
-        const newLead = (data?.result?.lead || data?.result || data) as any;
+        const data = body as { result?: { lead?: Lead; data?: Lead[] }; data?: Lead[] };
+        const newLead = (data?.result?.lead || data?.result || data) as Lead;
 
         const normalized: Lead = {
           id: newLead.id,
@@ -753,8 +602,8 @@ export default function LeadsPage() {
       try {
         // Check for related tasks before deleting
         const { body: tasksResponse } = await api.get(`tasks?relatedToType=lead&relatedToId=${selectedLead.id}`);
-        const tasksData = tasksResponse as any;
-        const relatedTasks = (tasksData?.result?.data || tasksData?.data || []) as any[];
+        const tasksData = tasksResponse as { result?: { data?: Task[] }; data?: Task[] };
+        const relatedTasks = (tasksData?.result?.data || tasksData?.data || []) as Task[];
 
         if (relatedTasks.length > 0) {
           const message = `This lead has ${relatedTasks.length} related tasks. Deleting will also remove these tasks. Are you sure?`;
@@ -906,7 +755,7 @@ export default function LeadsPage() {
                             </div>
             ) : leads.length > 0 ? (
               <div className="space-y-2 p-4">
-                {leads.map((lead, index) => (
+                {leads.map((lead) => (
                   <TableRow
                     key={lead.id}
                     lead={lead}
@@ -973,7 +822,7 @@ export default function LeadsPage() {
           }}
           onConfirm={handleConfirmDelete}
           title="Delete Lead"
-          message={`Are you sure you want to delete "${selectedLead.title}"? This action cannot be undone.`}
+          message={`Are you sure you want to delete &quot;${selectedLead.title}&quot;? This action cannot be undone.`}
           confirmText="Delete"
           cancelText="Cancel"
           variant="destructive"
@@ -989,7 +838,7 @@ export default function LeadsPage() {
           title="Assign Lead"
           message={
             <div className="space-y-4">
-              <p>Assign "{selectedLead.title}" to a team member:</p>
+              <p>Assign &quot;{selectedLead.title}&quot; to a team member:</p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Employee or Manager

@@ -11,11 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PermissionMessage } from '@/components/ui/permission-message';
 import {
-  Building2, Search, Filter, Eye, Edit, Trash2, Users, DollarSign,
-  ArrowLeft, Plus, MoreVertical, Download, Upload, RefreshCcw,
-  TrendingUp, TrendingDown, AlertCircle, CheckCircle, X,
-  Calendar, Globe, Mail, Phone, MapPin, BarChart3, Settings,
-  Shield, Zap, Activity, Clock, CreditCard
+  Building2, Search, Filter, Eye, Edit, Users, DollarSign,
+  ArrowLeft, Plus, MoreVertical, Download, RefreshCcw,
+  TrendingUp, TrendingDown, CheckCircle, X,
+  Calendar, Globe, Mail, Phone, MapPin, BarChart3, CreditCard
 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -63,8 +62,8 @@ export default function SuperAdminCompaniesPage() {
       try {
         setIsLoading(true);
         const { body } = await api.get('companies?limit=100');
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: Company[] }; data?: Company[] };
+        const list = (data?.result?.data || data?.data || []) as Company[];
         
         const normalized: Company[] = list.map((c) => ({
           id: c.id,
@@ -81,7 +80,7 @@ export default function SuperAdminCompaniesPage() {
           email: c.email || `contact@${c.name.toLowerCase().replace(/\s+/g, '')}.com`,
           phone: c.phone,
           location: c.location || 'N/A',
-          lastActivity: c.lastActivity || c.updatedAt,
+          lastActivity: c.lastActivity || c.createdAt,
           tasksCount: c.tasksCount || Math.floor(Math.random() * 100),
           leadsCount: c.leadsCount || Math.floor(Math.random() * 50),
           customersCount: c.customersCount || Math.floor(Math.random() * 200),
@@ -402,7 +401,7 @@ export default function SuperAdminCompaniesPage() {
                 <select
                   className="text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'revenue' | 'users' | 'created')}
                 >
                   <option value="created">Sort by: Created Date</option>
                   <option value="name">Sort by: Name</option>
@@ -505,7 +504,7 @@ export default function SuperAdminCompaniesPage() {
                       <th className="text-left py-4 px-4">
                         <Checkbox
                           checked={selectedCompanies.size === filteredAndSortedCompanies.length}
-                          onCheckedChange={toggleSelectAll}
+                          onChange={toggleSelectAll}
                         />
                       </th>
                       <th className="text-left py-4 px-4 text-sm font-semibold text-gray-700">Company</th>
@@ -525,7 +524,7 @@ export default function SuperAdminCompaniesPage() {
                         <td className="py-4 px-4">
                           <Checkbox
                             checked={selectedCompanies.has(company.id)}
-                            onCheckedChange={() => toggleCompanySelection(company.id)}
+                            onChange={() => toggleCompanySelection(company.id)}
                           />
                         </td>
                         <td className="py-4 px-4">
@@ -643,7 +642,7 @@ export default function SuperAdminCompaniesPage() {
                         </div>
                         <Checkbox
                           checked={selectedCompanies.has(company.id)}
-                          onCheckedChange={() => toggleCompanySelection(company.id)}
+                          onChange={() => toggleCompanySelection(company.id)}
                         />
                       </div>
 

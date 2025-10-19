@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, BookOpen, Play, Users, FileText, Calendar, ExternalLink, ArrowRight } from 'lucide-react';
+import { BookOpen, Play, Users, FileText, Calendar, ExternalLink, ArrowRight } from 'lucide-react';
 
 export default function ResourcesPage() {
   const resources = [

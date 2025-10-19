@@ -5,9 +5,8 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Task, Customer, Lead } from '@/types';
+import { Task, Customer, Lead, User } from '@/types';
 import { formatDate } from '@/lib/utils';
 import api from '@/lib/api';
 
@@ -202,14 +201,14 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
           
           // Fetch customers
           const { body: customersBody } = await api.get('customers?limit=100');
-          const customersData = customersBody as any;
-          const customersList = (customersData?.result?.data || customersData?.data || []) as any[];
+          const customersData = customersBody as { result?: { data?: Customer[] }; data?: Customer[] };
+          const customersList = (customersData?.result?.data || customersData?.data || []) as Customer[];
           const normalizedCustomers: Customer[] = customersList.map((c) => ({
             id: c.id,
             name: c.name,
             email: c.email,
             phone: c.phone ?? '',
-            company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+            company: typeof c.company === 'string' ? c.company : (c.company as unknown as { name?: string })?.name || '',
             status: c.status ?? 'active',
             source: c.source ?? 'website',
             tags: c.tags ?? [],
@@ -223,8 +222,8 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
 
           // Fetch leads
           const { body: leadsBody } = await api.get('leads?limit=100');
-          const leadsData = leadsBody as any;
-          const leadsList = (leadsData?.result?.data || leadsData?.data || []) as any[];
+          const leadsData = leadsBody as { result?: { data?: Lead[] }; data?: Lead[] };
+          const leadsList = (leadsData?.result?.data || leadsData?.data || []) as Lead[];
           const normalizedLeads: Lead[] = leadsList.map((l) => ({
             id: l.id,
             title: l.title,
@@ -247,8 +246,8 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
           if (can('assign_task')) {
             try {
               const { body: employeesBody } = await api.get('users?limit=100');
-              const employeesData = employeesBody as any;
-              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as any[];
+              const employeesData = employeesBody as { result?: { data?: User[]; users?: User[] }; data?: User[] };
+              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as User[];
               const normalizedEmployees: Employee[] = employeesList.map((e) => ({
                 id: e.id,
                 name: e.name,
@@ -467,7 +466,7 @@ export function AddEditTaskModal({ isOpen, onClose, task, onSave }: AddEditTaskM
                 setFormData({ 
                   ...formData, 
                   relatedToId: e.target.value,
-                  relatedToName: (selectedItem as any)?.name || (selectedItem as any)?.title || ''
+                  relatedToName: (selectedItem as Customer)?.name || (selectedItem as Lead)?.title || ''
                 });
               }}
               disabled={!formData.relatedToType || isLoadingData}

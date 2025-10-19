@@ -8,10 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PermissionMessage } from '@/components/ui/permission-message';
 import {
-  ArrowLeft, TrendingUp, TrendingDown, DollarSign, Users, Building2,
-  Activity, Calendar, Download, BarChart3, PieChart, LineChart,
-  Target, Award, Zap, Clock, Globe, CreditCard, ShoppingCart,
-  UserPlus, ArrowUp, ArrowDown, Percent, Eye
+  ArrowLeft, TrendingUp, DollarSign, Users, Building2,
+  Activity, Calendar, Download, BarChart3, PieChart,
+  Target, Award, Zap, Percent, Eye, ArrowUp, CreditCard
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
@@ -589,7 +588,7 @@ export default function SuperAdminAnalyticsPage() {
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-1">On Track</h3>
                   <p className="text-sm text-blue-800">
-                    You're {metrics.revenue.achieved}% toward revenue target. Projected to reach {formatCurrency(metrics.revenue.target)} by month end.
+                    You&apos;re {metrics.revenue.achieved}% toward revenue target. Projected to reach {formatCurrency(metrics.revenue.target)} by month end.
                   </p>
                 </div>
               </div>

@@ -5,9 +5,8 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select } from '@/components/ui/select';
 import { usePermissions } from '@/hooks/usePermissions';
-import { Lead, Customer } from '@/types';
+import { Lead, Customer, User } from '@/types';
 import api from '@/lib/api';
 
 interface Employee {
@@ -169,14 +168,14 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
           
           // Fetch customers
           const { body } = await api.get('customers?limit=100');
-          const data = body as any;
-          const list = (data?.result?.data || data?.data || []) as any[];
+          const data = body as { result?: { data?: Customer[] }; data?: Customer[] };
+          const list = (data?.result?.data || data?.data || []) as Customer[];
           const normalized: Customer[] = list.map((c) => ({
             id: c.id,
             name: c.name,
             email: c.email,
             phone: c.phone ?? '',
-            company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+            company: c.company || '',
             status: c.status ?? 'active',
             source: c.source ?? 'website',
             tags: c.tags ?? [],
@@ -192,8 +191,8 @@ export function AddEditLeadModal({ isOpen, onClose, lead, onSave }: AddEditLeadM
           if (can('assign_lead')) {
             try {
               const { body: employeesBody } = await api.get('users?limit=100');
-              const employeesData = employeesBody as any;
-              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as any[];
+              const employeesData = employeesBody as { result?: { data?: User[]; users?: User[] }; data?: User[] };
+              const employeesList = (employeesData?.result?.data || employeesData?.result?.users || employeesData?.data || []) as User[];
               const normalizedEmployees: Employee[] = employeesList.map((e) => ({
                 id: e.id,
                 name: e.name,

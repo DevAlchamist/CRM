@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ConfirmModal } from '@/components/ui/modal';
 import { ViewCustomerModal, AddEditCustomerModal } from '@/components/forms/customer-modals';
+import { useToast } from '@/components/ui/toast';
 import { 
   Search, 
   Filter, 
@@ -24,9 +25,10 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, getStatusColor, getInitials } from '@/lib/utils';
-import { Customer } from '@/types';
+import { Customer, Lead, Task } from '@/types';
 
 export default function CustomersPage() {
+  const { addToast } = useToast();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -36,7 +38,6 @@ export default function CustomersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
@@ -50,16 +51,15 @@ export default function CustomersPage() {
         params.append('page', String(page));
         params.append('limit', String(limit));
         if (search) params.append('search', search);
-        if (statusFilter) params.append('status', statusFilter);
         const { body } = await api.get(`customers?${params.toString()}`);
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: Customer[] }; data?: Customer[] };
+        const list = (data?.result?.data || data?.data || []) as Customer[];
         const normalized: Customer[] = list.map((c) => ({
           id: c.id,
           name: c.name,
           email: c.email,
           phone: c.phone ?? '',
-          company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+          company: c.company || '',
           status: c.status ?? 'active',
           source: c.source ?? 'website',
           tags: c.tags ?? [],
@@ -70,8 +70,8 @@ export default function CustomersPage() {
           avatar: c.avatar,
         }));
         if (!cancelled) setCustomers(normalized);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load customers');
+      } catch (e: unknown) {
+        if (!cancelled) setError((e as Error)?.message || 'Failed to load customers');
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -80,7 +80,7 @@ export default function CustomersPage() {
     return () => {
       cancelled = true;
     };
-  }, [page, limit, search, statusFilter]);
+  }, [page, limit, search]);
 
   const totalValue = useMemo(() => customers.reduce((sum, customer) => sum + (customer.totalValue || 0), 0), [customers]);
   const activeCustomers = useMemo(() => customers.filter(c => c.status === 'active').length, [customers]);
@@ -118,19 +118,19 @@ export default function CustomersPage() {
           status: customerData.status || 'active',
           source: customerData.source || 'website',
           tags: customerData.tags || [],
-          ownerId: (customerData as any).ownerId,
+          ownerId: (customerData as { ownerId?: string }).ownerId,
         };
 
         const { body } = await api.post('customers', { json: payload });
-        const data = body as any;
-        const c = (data?.result?.customer || data?.result || data) as any;
+        const data = body as { result?: { customer?: Customer; data?: Customer[] }; customer?: Customer; data?: Customer[] };
+        const c = (data?.result?.customer || data?.customer || data?.result || data) as Customer;
 
         const created: Customer = {
           id: c.id,
           name: c.name,
           email: c.email,
           phone: c.phone ?? '',
-          company: typeof c.company === 'string' ? c.company : (c.company?.name || ''),
+          company: c.company || '',
           status: c.status ?? 'active',
           source: c.source ?? 'website',
           tags: c.tags ?? [],
@@ -153,12 +153,12 @@ export default function CustomersPage() {
       try {
         // Check for related leads and tasks before deleting
         const { body: leadsResponse } = await api.get(`leads?customerId=${selectedCustomer.id}`);
-        const leadsData = leadsResponse as any;
-        const relatedLeads = (leadsData?.result?.data || leadsData?.data || []) as any[];
+        const leadsData = leadsResponse as { result?: { data?: Lead[] }; data?: Lead[] };
+        const relatedLeads = (leadsData?.result?.data || leadsData?.data || []) as Lead[];
         
         const { body: tasksResponse } = await api.get(`tasks?relatedToType=customer&relatedToId=${selectedCustomer.id}`);
-        const tasksData = tasksResponse as any;
-        const relatedTasks = (tasksData?.result?.data || tasksData?.data || []) as any[];
+        const tasksData = tasksResponse as { result?: { data?: Task[] }; data?: Task[] };
+        const relatedTasks = (tasksData?.result?.data || tasksData?.data || []) as Task[];
 
         if (relatedLeads.length > 0 || relatedTasks.length > 0) {
           const message = `This customer has ${relatedLeads.length} leads and ${relatedTasks.length} tasks. Deleting will also remove these related records. Are you sure?`;
@@ -170,7 +170,7 @@ export default function CustomersPage() {
         await api.delete(`customers/${selectedCustomer.id}`);
         setCustomers(customers.filter(c => c.id !== selectedCustomer.id));
         addToast('Customer and related records deleted successfully', 'success');
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to delete customer:', error);
         addToast('Failed to delete customer', 'error');
       }

@@ -10,12 +10,12 @@ import { Button } from '@/components/ui/button';
 import { PermissionMessage } from '@/components/ui/permission-message';
 import {
   Building2, Users, DollarSign, TrendingUp, Activity, Shield, Database,
-  BarChart3, Settings, Eye, Plus, AlertCircle, CheckCircle, Clock, Zap,
-  Server, Globe, UserPlus, CreditCard, TrendingDown, ArrowUp, ArrowDown,
-  Cpu, Bell, FileText, RefreshCcw, Download, Upload
+  BarChart3, Settings, Eye, CheckCircle, Zap,
+  Server, UserPlus, CreditCard, TrendingDown, ArrowUp, ArrowDown,
+  Cpu, Bell, FileText, RefreshCcw, Download
 } from 'lucide-react';
 import api from '@/lib/api';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 
 interface Company {
   id: string;
@@ -79,7 +79,7 @@ export default function SuperAdminDashboard() {
     churnRate: 0,
     avgRevenuePerCompany: 0,
   });
-  const [systemHealth, setSystemHealth] = useState<SystemHealth>({
+  const [systemHealth] = useState<SystemHealth>({
     status: 'healthy',
     uptime: 99.9,
     apiResponseTime: 145,
@@ -99,8 +99,8 @@ export default function SuperAdminDashboard() {
         
         // Fetch companies
         const { body: companiesBody } = await api.get('companies?limit=10');
-        const companiesData = companiesBody as any;
-        const companiesList = (companiesData?.result?.data || companiesData?.data || []) as any[];
+        const companiesData = companiesBody as { result?: { data?: Company[] }; data?: Company[] };
+        const companiesList = (companiesData?.result?.data || companiesData?.data || []) as Company[];
         
         const normalizedCompanies: Company[] = companiesList.map((c) => ({
           id: c.id,
@@ -112,7 +112,7 @@ export default function SuperAdminDashboard() {
           userCount: c.userCount || 0,
           revenue: c.revenue || 0,
           createdAt: c.createdAt,
-          lastActivity: c.lastActivity || c.updatedAt || new Date().toISOString(),
+          lastActivity: c.lastActivity || c.createdAt || new Date().toISOString(),
         }));
         
         setCompanies(normalizedCompanies);

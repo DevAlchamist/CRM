@@ -47,7 +47,6 @@ export default function EmployeesPage() {
 
   // Check permissions once outside useEffect to avoid infinite loops
   const isManagerOnly = hasRole('manager') && !hasRole('admin');
-  const canAssignUsers = hasRole('admin') || hasRole('manager');
 
   useEffect(() => {
     let cancelled = false;
@@ -70,8 +69,8 @@ export default function EmployeesPage() {
         console.log('Raw API response:', body);
         
         // Expecting body to be { error, message, result: { data: [...] } }
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: UserType[] }; data?: UserType[] };
+        const list = (data?.result?.data || data?.data || []) as UserType[];
         console.log('Employee list from API:', list);
         
         const normalized: UserType[] = list.map((u) => ({
@@ -92,8 +91,8 @@ export default function EmployeesPage() {
         
         console.log('Normalized employees:', normalized);
         if (!cancelled) setEmployees(normalized);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load employees');
+      } catch (e: unknown) {
+        if (!cancelled) setError((e as Error)?.message || 'Failed to load employees');
         addToast('Failed to load employees', 'error');
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -103,7 +102,7 @@ export default function EmployeesPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, isManagerOnly]);
+  }, [user?.id, isManagerOnly, addToast]);
 
   const totalEmployees = employees.length;
   const activeEmployees = employees.filter(user => user.isActive).length;
@@ -193,10 +192,10 @@ export default function EmployeesPage() {
           addToast('Employee created successfully (local creation)', 'success');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save employee:', error);
-      console.error('Error details:', error.response || error.message);
-      addToast(`Failed to save employee: ${error.message || 'Unknown error'}`, 'error');
+      console.error('Error details:', (error as { response?: unknown }).response || (error as Error).message);
+      addToast(`Failed to save employee: ${(error as Error).message || 'Unknown error'}`, 'error');
     }
   };
 
@@ -207,7 +206,7 @@ export default function EmployeesPage() {
         setEmployees(employees.filter(e => e.id !== selectedEmployee.id));
         setSelectedEmployee(null);
         addToast('Employee deleted successfully', 'success');
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to delete employee:', error);
         addToast('Failed to delete employee', 'error');
         // Still remove from UI as fallback

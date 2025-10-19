@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Building2 } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { LoginSkeleton } from '@/components/auth/LoginSkeleton';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   return (

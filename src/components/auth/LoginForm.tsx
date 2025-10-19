@@ -52,7 +52,7 @@ export function LoginForm() {
         } else {
           router.push('/dashboard');
         }
-      } catch (validationError) {
+      } catch {
         console.warn('LoginForm: Session validation pending, proceeding with redirect');
         // Even if validation fails, proceed - GlobalAuthChecker will handle it
         router.push('/dashboard');

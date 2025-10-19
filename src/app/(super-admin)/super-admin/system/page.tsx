@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useToast } from '@/components/ui/toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,10 +10,10 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { PermissionMessage } from '@/components/ui/permission-message';
 import {
-  ArrowLeft, Settings, Database, Shield, Bell, Mail, Globe, Code, Zap,
-  Server, Cpu, HardDrive, Activity, Clock, AlertCircle, CheckCircle,
+  ArrowLeft, Settings, Database, Shield, Bell, Globe, Code, Zap,
+  Server, Cpu, HardDrive, Activity, AlertCircle, CheckCircle,
   XCircle, Info, Download, Upload, RefreshCcw, Terminal, FileText,
-  Lock, Unlock, Eye, EyeOff, Search, Filter
+  Search, ArrowDown, ArrowUp, Clock
 } from 'lucide-react';
 
 interface SystemLog {
@@ -41,7 +40,6 @@ interface SystemMetrics {
 
 export default function SuperAdminSystemPage() {
   const { hasRole } = usePermissions();
-  const { addToast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'settings' | 'monitoring' | 'logs'>('settings');
   const [logs, setLogs] = useState<SystemLog[]>([]);
@@ -219,14 +217,14 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">New Registrations</p>
                       <p className="text-sm text-gray-400">Allow new company signups</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
                       <p className="font-medium text-white">Public API</p>
                       <p className="text-sm text-gray-400">Enable public API endpoints</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
@@ -252,14 +250,14 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">Require 2FA for Admins</p>
                       <p className="text-sm text-gray-400">Enforce two-factor authentication</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
                       <p className="font-medium text-white">Session Timeout</p>
                       <p className="text-sm text-gray-400">Auto logout after 30 minutes</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
@@ -273,7 +271,7 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">Rate Limiting</p>
                       <p className="text-sm text-gray-400">Prevent API abuse</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                 </CardContent>
               </Card>
@@ -292,7 +290,7 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">Email Notifications</p>
                       <p className="text-sm text-gray-400">System alerts via email</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
@@ -313,7 +311,7 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">Webhook Events</p>
                       <p className="text-sm text-gray-400">Send events to external services</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                 </CardContent>
               </Card>
@@ -332,14 +330,14 @@ export default function SuperAdminSystemPage() {
                       <p className="font-medium text-white">Auto Backup</p>
                       <p className="text-sm text-gray-400">Daily at 2:00 AM</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
                     <div>
                       <p className="font-medium text-white">Data Retention</p>
                       <p className="text-sm text-gray-400">Keep logs for 90 days</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={true} />
                   </div>
                   <div className="p-4 bg-gray-700/50 rounded-lg">
                     <p className="text-sm text-gray-400 mb-3">Last backup: 2 hours ago</p>

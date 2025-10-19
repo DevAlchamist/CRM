@@ -295,7 +295,7 @@ export const authApi = {
     const result = response.body as {
       error: boolean;
       message: string;
-      result: any;
+      result: unknown;
     };
     
     if (result.error) {
@@ -306,24 +306,24 @@ export const authApi = {
     // Support both shapes:
     // 1) { user, company, tokens? }
     // 2) { id, email, name, role, companyId, company, accessToken?, refreshToken?, tokens? }
-    const payload = result.result || {};
+    const payload = result.result || {} as Record<string, unknown>;
 
-    const user: LoginResponse['user'] = payload.user
-      ? payload.user
+    const user: LoginResponse['user'] = (payload as any).user
+      ? (payload as any).user
       : {
-          id: payload.id,
-          email: payload.email,
-          name: payload.name,
-          role: payload.role,
-          companyId: payload.companyId,
-          lastLoginAt: payload.lastLoginAt ?? null,
+          id: (payload as any).id,
+          email: (payload as any).email,
+          name: (payload as any).name,
+          role: (payload as any).role,
+          companyId: (payload as any).companyId,
+          lastLoginAt: (payload as any).lastLoginAt ?? null,
         };
 
-    const company: Company | undefined = payload.company ?? undefined;
+    const company: Company | undefined = (payload as any).company ?? undefined;
 
-    const tokens = payload.tokens ?? (
-      payload.accessToken && payload.refreshToken
-        ? { accessToken: payload.accessToken, refreshToken: payload.refreshToken }
+    const tokens = (payload as any).tokens ?? (
+      (payload as any).accessToken && (payload as any).refreshToken
+        ? { accessToken: (payload as any).accessToken, refreshToken: (payload as any).refreshToken }
         : { accessToken: '', refreshToken: '' }
     );
     

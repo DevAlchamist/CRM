@@ -242,7 +242,7 @@ export default function DashboardPage() {
                   <div key={lead.id} className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>
-                        {lead.customerName.split(' ').map(n => n[0]).join('')}
+                        {lead.customerName?.split(' ').map(n => n[0]).join('') || 'L'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">

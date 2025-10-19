@@ -181,13 +181,13 @@ export function AddEditEmployeeModal({ isOpen, onClose, employee, onSave }: AddE
           }
           
           const { body } = await api.get(`users?${rolesQuery}&limit=100`);
-          const data = body as any;
-          const list = (data?.result?.data || data?.data || []) as any[];
+          const data = body as { result?: { data?: User[] }; data?: User[] };
+          const list = (data?.result?.data || data?.data || []) as User[];
           
           // Filter out the current user from the list (can't assign to self)
-          const filteredList = list.filter((u: any) => u.id !== user?.id);
+          const filteredList = list.filter((u: User) => u.id !== user?.id);
           
-          const normalized: User[] = filteredList.map((u: any) => ({
+          const normalized: User[] = filteredList.map((u: User) => ({
             id: u.id,
             email: u.email,
             name: u.name,

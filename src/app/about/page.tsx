@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Target, Award, Rocket, Heart, Shield, TrendingUp, Globe, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Users, Target, Award, Rocket, Heart, Shield, Globe, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function AboutPage() {
   const values = [

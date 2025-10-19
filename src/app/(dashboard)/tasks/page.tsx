@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,10 +27,6 @@ import {
   Edit,
   Trash2,
   GripVertical,
-  MoreHorizontal,
-  User,
-  Flag,
-  MessageSquare
 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatDate, getPriorityColor, getRelativeTime, getInitials, isOverdue, calculateDaysUntil } from '@/lib/utils';
@@ -45,12 +41,6 @@ const taskStatuses = [
 ];
 
 // Draggable Task Card Component
-interface TaskCardProps {
-  task: Task;
-  onView: (task: Task) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (task: Task) => void;
-}
 
 // Helper functions for task icons
 const getTaskIcon = (type: string) => {
@@ -63,164 +53,12 @@ const getTaskIcon = (type: string) => {
   }
 };
 
-const getTaskStatusIcon = (status: string) => {
-  switch (status) {
-    case 'completed': return CheckCircle;
-    case 'cancelled': return XCircle;
-    case 'in_progress': return Clock;
-    default: return AlertCircle;
-  }
-};
 
-function TaskCard({ task, onView, onEdit, onDelete }: TaskCardProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const TaskIcon = getTaskIcon(task.type);
-  const StatusIcon = getTaskStatusIcon(task.status);
-  const daysUntil = calculateDaysUntil(task.dueDate);
-  const isTaskOverdue = isOverdue(task.dueDate);
-
-  const handleDragStart = (e: React.DragEvent) => {
-    setIsDragging(true);
-    e.dataTransfer.setData('application/json', JSON.stringify({ taskId: task.id, task }));
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-  };
-
-  return (
-    <div
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className={`bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-60 shadow-xl border-blue-400 scale-105' : ''
-      }`}
-    >
-      {/* Task Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start space-x-3 flex-1 min-w-0">
-          <div className="flex-shrink-0 mt-0.5">
-            <GripVertical className="h-4 w-4 text-gray-400" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold text-gray-900 truncate">
-              {task.title}
-            </h4>
-            <div className="flex items-center space-x-2 mt-1">
-              <TaskIcon className="h-3 w-3 text-gray-400" />
-              <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                {task.priority}
-              </Badge>
-            </div>
-          </div>
-        </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-          <MoreHorizontal className="h-3 w-3" />
-        </Button>
-      </div>
-
-      {/* Task Description */}
-      {task.description && (
-        <p className="text-xs text-gray-600 line-clamp-2 mb-3">
-          {task.description}
-        </p>
-      )}
-
-      {/* Task Metadata */}
-      <div className="space-y-2">
-        {/* Due Date */}
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-3 w-3 text-gray-400" />
-          <span className={`text-xs font-medium ${
-            isTaskOverdue ? 'text-red-600' : 
-            daysUntil <= 1 ? 'text-yellow-600' : 
-            'text-gray-600'
-          }`}>
-            {isTaskOverdue ? 'Overdue' : getRelativeTime(task.dueDate)}
-          </span>
-        </div>
-
-        {/* Assigned User */}
-        <div className="flex items-center space-x-2">
-          <Avatar className="h-5 w-5">
-            <AvatarImage src={undefined} />
-            <AvatarFallback className="text-xs">
-              {task.assignedToName ? getInitials(task.assignedToName) : 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-xs text-gray-600 truncate">
-            {task.assignedToName || 'Unassigned'}
-          </span>
-        </div>
-
-        {/* Related To */}
-        {task.relatedTo && (
-          <div className="flex items-center space-x-2">
-            <Flag className="h-3 w-3 text-gray-400" />
-            <span className="text-xs text-gray-600 truncate">
-              {task.relatedTo.type} - {task.relatedTo.name}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Task Actions */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-        <div className="flex items-center space-x-1">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(task);
-            }}
-            title="View Task"
-          >
-            <Eye className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(task);
-            }}
-            title="Edit Task"
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task);
-            }}
-            title="Delete Task"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-        <StatusIcon className={`h-4 w-4 ${
-          task.status === 'completed' ? 'text-green-500' :
-          task.status === 'cancelled' ? 'text-red-500' :
-          task.status === 'in_progress' ? 'text-blue-500' :
-          'text-yellow-500'
-        }`} />
-      </div>
-    </div>
-  );
-}
 
 // Task Table Row Component
 interface TaskTableRowProps {
   task: Task;
-  statuses: { id: string; name: string; color: string; icon: any }[];
+  statuses: { id: string; name: string; color: string; icon: React.ComponentType<{ className?: string }> }[];
   onView: (task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
@@ -229,7 +67,6 @@ interface TaskTableRowProps {
 function TaskTableRow({ task, statuses, onView, onEdit, onDelete }: TaskTableRowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const TaskIcon = getTaskIcon(task.type);
-  const StatusIcon = getTaskStatusIcon(task.status);
   const daysUntil = calculateDaysUntil(task.dueDate);
   const isTaskOverdue = isOverdue(task.dueDate);
 
@@ -297,22 +134,18 @@ function TaskTableRow({ task, statuses, onView, onEdit, onDelete }: TaskTableRow
         {/* Status Columns */}
         {statuses.map((status) => {
           const isCurrentStatus = task.status === status.id;
-          const [isOver, setIsOver] = useState(false);
 
           const handleDragOver = (e: React.DragEvent) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            setIsOver(true);
           };
 
           const handleDragLeave = (e: React.DragEvent) => {
             e.preventDefault();
-            setIsOver(false);
           };
 
           const handleDrop = (e: React.DragEvent) => {
             e.preventDefault();
-            setIsOver(false);
             
             try {
               const data = JSON.parse(e.dataTransfer.getData('application/json'));
@@ -340,9 +173,7 @@ function TaskTableRow({ task, statuses, onView, onEdit, onDelete }: TaskTableRow
               className={`p-4 border-r border-gray-100 last:border-r-0 min-h-[120px] flex items-center justify-center transition-all duration-200 ${
                 isCurrentStatus 
                   ? 'bg-blue-50 border-l-4 border-l-blue-400 cursor-grab active:cursor-grabbing' 
-                  : isOver 
-                    ? 'bg-green-50 border-2 border-green-300 scale-105 shadow-md' 
-                    : 'hover:bg-gray-50 hover:border-gray-300'
+                  : 'hover:bg-gray-50 hover:border-gray-300'
               } ${isCurrentStatus && isDragging ? 'opacity-60 shadow-xl border-blue-400 scale-105' : ''}`}
             >
               {isCurrentStatus ? (
@@ -360,12 +191,10 @@ function TaskTableRow({ task, statuses, onView, onEdit, onDelete }: TaskTableRow
               ) : (
                 <div className="text-center">
                   <div className="text-xs text-gray-400 mb-1">
-                    {isOver ? '🎯' : '📁'}
+                    📁
                   </div>
-                  <div className={`text-xs font-medium transition-colors ${
-                    isOver ? 'text-green-600' : 'text-gray-400'
-                  }`}>
-                    {isOver ? 'Drop to Move' : 'Drop here'}
+                  <div className="text-xs font-medium text-gray-400">
+                    Drop here
                   </div>
                 </div>
               )}
@@ -453,10 +282,10 @@ export default function TasksPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
-  const [assigneeId, setAssigneeId] = useState<string | undefined>(undefined);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [limit] = useState(20);
+  const [statusFilter] = useState<string | undefined>(undefined);
+  const [assigneeId] = useState<string | undefined>(undefined);
 
   // Check permission once outside useEffect to avoid infinite loops
   const canViewAll = can('view_all_tasks');
@@ -479,8 +308,8 @@ export default function TasksPage() {
         }
         
         const { body } = await api.get(`tasks?${params.toString()}`);
-        const data = body as any;
-        const list = (data?.result?.data || data?.data || []) as any[];
+        const data = body as { result?: { data?: Task[] }; data?: Task[] };
+        const list = (data?.result?.data || data?.data || []) as Task[];
         const normalized: Task[] = list.map((t) => ({
           id: t.id,
           title: t.title,
@@ -491,7 +320,7 @@ export default function TasksPage() {
           assignedTo: t.assignedTo ?? '',
           assignedToName: t.assignedToName ?? '',
           dueDate: t.dueDate ? new Date(t.dueDate) : new Date(),
-          relatedTo: t.relatedType && t.relatedId ? { type: t.relatedType, id: t.relatedId, name: t.relatedName ?? '' } : undefined,
+          relatedTo: t.relatedTo,
           createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
           updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date(),
         }));
@@ -505,16 +334,15 @@ export default function TasksPage() {
         }
         
         if (!cancelled) setTasks(filteredTasks);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load tasks');
+      } catch (e: unknown) {
+        if (!cancelled) setError((e as Error)?.message || 'Failed to load tasks');
       } finally {
         if (!cancelled) setIsLoading(false);
       }
     };
     fetchTasks();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, statusFilter, assigneeId, user?.id, canViewAll]);
+  }, [limit, user?.id, canViewAll]);
 
   const totalTasks = useMemo(() => tasks.length, [tasks]);
   const completedTasks = useMemo(() => tasks.filter(task => task.status === 'completed').length, [tasks]);
@@ -552,8 +380,8 @@ export default function TasksPage() {
         };
 
         const { body } = await api.patch(`tasks/${selectedTask.id}`, { json: payload });
-        const data = body as any;
-        const updatedTask = (data?.result?.task || data?.result || data) as any;
+        const data = body as { result?: { task?: Task; data?: Task[] }; task?: Task; data?: Task[] };
+        const updatedTask = (data?.result?.task || data?.task || data?.result || data) as Task;
 
         const normalized: Task = {
           id: updatedTask.id,
@@ -586,9 +414,9 @@ export default function TasksPage() {
           relatedId: taskData.relatedTo?.id,
         };
 
-        const { body } = await api.post('tasks', { json: payload });
-        const data = body as any;
-        const newTask = (data?.result?.task || data?.result || data) as any;
+        const { body } = await api.post('tasks', { json: payload });    
+        const data = body as { result?: { task?: Task; data?: Task[] }; task?: Task; data?: Task[] };
+        const newTask = (data?.result?.task || data?.task || data?.result || data) as Task;
 
         const normalized: Task = {
           id: newTask.id,
@@ -633,7 +461,7 @@ export default function TasksPage() {
   useEffect(() => {
     const handleTaskDropped = async (event: Event) => {
       const customEvent = event as CustomEvent;
-      const { taskId, task, newStatus } = customEvent.detail;
+      const { taskId, newStatus } = customEvent.detail;
       
       // Find the task being moved
       const taskToUpdate = tasks.find(t => t.id === taskId);
@@ -642,7 +470,7 @@ export default function TasksPage() {
       // Update the task's status optimistically
       const updatedTasks = tasks.map(t => 
         t.id === taskId 
-          ? { ...t, status: newStatus as any }
+          ? { ...t, status: newStatus as Task['status'] }
           : t
       );
       setTasks(updatedTasks);
@@ -804,7 +632,7 @@ export default function TasksPage() {
               </div>
             ) : tasks.length > 0 ? (
               <div className="space-y-2 p-4">
-                {tasks.map((task, index) => (
+                {tasks.map((task) => (
                   <TaskTableRow
                     key={task.id}
                     task={task}

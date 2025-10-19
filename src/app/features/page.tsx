@@ -328,7 +328,7 @@ export default function FeaturesPage() {
             ].map((testimonial, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
-                  <div className="text-4xl text-[#2563EB] mb-4">"</div>
+                  <div className="text-4xl text-[#2563EB] mb-4">&quot;</div>
                   <p className="text-[#6B7280] mb-6 italic">{testimonial.quote}</p>
                   <div>
                     <p className="font-semibold text-[#111827]">{testimonial.author}</p>
@@ -351,7 +351,7 @@ export default function FeaturesPage() {
                 Frequently Asked Questions
               </h2>
               <p className="text-xl text-[#6B7280]">
-                Have questions about our features? We've got answers.
+                Have questions about our features? We&apos;ve got answers.
               </p>
             </div>
             

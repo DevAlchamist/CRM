@@ -364,7 +364,7 @@ const authSlice = createSlice({
       .addCase(getMe.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        state.company = (action.payload as any).company || state.company;
+        state.company = (action.payload as { company?: Company }).company || state.company;
         state.isAuthenticated = true;
         state.error = null;
       })
