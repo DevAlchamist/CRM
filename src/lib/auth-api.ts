@@ -70,6 +70,24 @@ export interface CompaniesResponse {
   limit: number;
 }
 
+// Union type for API response payload that can have different shapes
+interface AuthPayload {
+  // Shape 1: { user, company, tokens? }
+  user?: LoginResponse['user'];
+  company?: Company;
+  tokens?: LoginResponse['tokens'];
+  
+  // Shape 2: { id, email, name, role, companyId, company, accessToken?, refreshToken?, tokens? }
+  id?: string;
+  email?: string;
+  name?: string;
+  role?: 'super_admin' | 'admin' | 'manager' | 'employee';
+  companyId?: string;
+  lastLoginAt?: string | null;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -306,24 +324,24 @@ export const authApi = {
     // Support both shapes:
     // 1) { user, company, tokens? }
     // 2) { id, email, name, role, companyId, company, accessToken?, refreshToken?, tokens? }
-    const payload = result.result || {} as Record<string, unknown>;
+    const payload = (result.result || {}) as AuthPayload;
 
-    const user: LoginResponse['user'] = (payload as any).user
-      ? (payload as any).user
+    const user: LoginResponse['user'] = payload.user
+      ? payload.user
       : {
-          id: (payload as any).id,
-          email: (payload as any).email,
-          name: (payload as any).name,
-          role: (payload as any).role,
-          companyId: (payload as any).companyId,
-          lastLoginAt: (payload as any).lastLoginAt ?? null,
+          id: payload.id || '',
+          email: payload.email || '',
+          name: payload.name || '',
+          role: payload.role || 'employee',
+          companyId: payload.companyId || '',
+          lastLoginAt: payload.lastLoginAt ?? null,
         };
 
-    const company: Company | undefined = (payload as any).company ?? undefined;
+    const company: Company | undefined = payload.company ?? undefined;
 
-    const tokens = (payload as any).tokens ?? (
-      (payload as any).accessToken && (payload as any).refreshToken
-        ? { accessToken: (payload as any).accessToken, refreshToken: (payload as any).refreshToken }
+    const tokens = payload.tokens ?? (
+      payload.accessToken && payload.refreshToken
+        ? { accessToken: payload.accessToken, refreshToken: payload.refreshToken }
         : { accessToken: '', refreshToken: '' }
     );
     
