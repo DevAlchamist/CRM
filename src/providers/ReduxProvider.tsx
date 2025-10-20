@@ -14,8 +14,11 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log('ReduxProvider: Initializing auth state');
-    dispatch(initializeAuth());
+    // Only initialize auth on client side
+    if (typeof window !== 'undefined') {
+      console.log('ReduxProvider: Initializing auth state');
+      dispatch(initializeAuth());
+    }
   }, [dispatch]);
 
   return <>{children}</>;

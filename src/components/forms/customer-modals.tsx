@@ -29,7 +29,7 @@ export function ViewCustomerModal({ isOpen, onClose, customer }: ViewCustomerMod
           </Avatar>
           <div>
             <h3 className="text-xl font-semibold">{customer.name}</h3>
-            <p className="text-gray-600">{customer.company}</p>
+            <p className="text-gray-600">{typeof customer.company === 'string' ? customer.company : (customer.company as unknown as { name?: string })?.name || ''}</p>
             <div className="flex items-center space-x-2 mt-2">
               <Badge className={`text-xs ${customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {customer.status}
@@ -64,7 +64,7 @@ export function ViewCustomerModal({ isOpen, onClose, customer }: ViewCustomerMod
             <div className="space-y-2">
               <div>
                 <span className="text-sm text-gray-500">Company:</span>
-                <p className="text-sm">{customer.company || 'N/A'}</p>
+                <p className="text-sm">{typeof customer.company === 'string' ? customer.company : (customer.company as unknown as { name?: string })?.name || 'N/A'}</p>
               </div>
               <div>
                 <span className="text-sm text-gray-500">Total Value:</span>

@@ -243,28 +243,34 @@ const authSlice = createSlice({
     },
     initializeAuth: (state) => {
       // Initialize auth state from localStorage and cookies on app start
-      if (typeof window !== 'undefined') {
-        try {
-          // Check localStorage first
-          let accessToken = localStorage.getItem('accessToken');
-          let refreshToken = localStorage.getItem('refreshToken');
+      // Only run on client side
+      if (typeof window === 'undefined') return;
+      
+      try {
+        // Check localStorage first
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
 
-          // If not in localStorage, check cookies
-          if (!accessToken || !refreshToken) {
-            const cookies = getAuthCookies();
-            accessToken = cookies.accessToken;
-            refreshToken = cookies.refreshToken;
-          }
-
-          if (accessToken && refreshToken) {
-            state.tokens = { accessToken, refreshToken };
-            state.isAuthenticated = true;
-            console.log('Auth initialized from storage');
-          }
-        } catch (error) {
-          // Handle storage errors gracefully
-          console.warn('Failed to initialize auth from storage:', error);
+        // If not in localStorage, check cookies
+        if (!accessToken || !refreshToken) {
+          const cookies = getAuthCookies();
+          accessToken = cookies.accessToken;
+          refreshToken = cookies.refreshToken;
         }
+
+        if (accessToken && refreshToken) {
+          state.tokens = { accessToken, refreshToken };
+          state.isAuthenticated = true;
+          console.log('Auth initialized from storage');
+        }
+      } catch (error) {
+        // Handle storage errors gracefully
+        console.warn('Failed to initialize auth from storage:', error);
+        // Clear any invalid state
+        state.tokens = { accessToken: null, refreshToken: null };
+        state.isAuthenticated = false;
+        state.user = null;
+        state.company = null;
       }
     },
     clearAuth: (state) => {
