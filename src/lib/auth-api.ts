@@ -122,6 +122,7 @@ export const authApi = {
         result: {
           accessToken?: string;
           refreshToken?: string;
+          token?: string; // API returns 'token' instead of 'accessToken'
           tokens?: { accessToken: string; refreshToken: string };
           user: LoginResponse['user'];
         };
@@ -135,7 +136,7 @@ export const authApi = {
       }
       
       const tokens = data.result.tokens ?? {
-        accessToken: data.result.accessToken || '',
+        accessToken: data.result.accessToken || data.result.token || '',
         refreshToken: data.result.refreshToken || '',
       };
       
@@ -145,6 +146,8 @@ export const authApi = {
       };
       
       console.log('Auth API: Login successful, returning normalized result:', normalized);
+      console.log('Auth API: Access token being stored:', tokens.accessToken);
+      console.log('Auth API: Refresh token being stored:', tokens.refreshToken);
       return normalized;
     } catch (error: unknown) {
       console.error('Auth API: Login error caught:', error);
