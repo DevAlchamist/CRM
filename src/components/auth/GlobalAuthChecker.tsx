@@ -13,6 +13,7 @@ export function GlobalAuthChecker() {
   const { addToast } = useToast();
   const hasCheckedAuth = useRef(false);
   const sessionCheckInterval = useRef<NodeJS.Timeout | null>(null);
+  const lastAuthCheck = useRef<number>(0);
 
   useEffect(() => {
     // Skip auth check for public routes
@@ -39,6 +40,14 @@ export function GlobalAuthChecker() {
       }
       
       if (hasTokens && !user) {
+        // Debounce auth checks to prevent rate limiting
+        const now = Date.now();
+        if (now - lastAuthCheck.current < 2000) { // 2 second debounce
+          console.log('GlobalAuthChecker: Skipping auth check due to debounce');
+          return;
+        }
+        lastAuthCheck.current = now;
+        
         console.log('GlobalAuthChecker: Found tokens, attempting auto-login...');
         try {
           const userData = await getMe().unwrap();
@@ -81,6 +90,9 @@ export function GlobalAuthChecker() {
               addToast('Session expired, please log in again.', 'warning');
               router.push('/login');
             }
+          } else if (isHttpError(error) && error.statusCode === 429) {
+            // Rate limit - just log and continue, don't clear auth
+            console.warn('GlobalAuthChecker: Rate limited, will retry later');
           }
         }
       }
@@ -91,6 +103,14 @@ export function GlobalAuthChecker() {
     // Periodic session validation (every 5 minutes) - only on protected routes
     if (!isPublicRoute && isAuthenticated && user) {
       sessionCheckInterval.current = setInterval(async () => {
+        // Debounce periodic checks too
+        const now = Date.now();
+        if (now - lastAuthCheck.current < 10000) { // 10 second debounce for periodic checks
+          console.log('GlobalAuthChecker: Skipping periodic check due to debounce');
+          return;
+        }
+        lastAuthCheck.current = now;
+        
         console.log('GlobalAuthChecker: Performing periodic session check...');
         try {
           await getMe().unwrap();
@@ -118,6 +138,9 @@ export function GlobalAuthChecker() {
             if (sessionCheckInterval.current) {
               clearInterval(sessionCheckInterval.current);
             }
+          } else if (isHttpError(error) && error.statusCode === 429) {
+            // Rate limit - just log and continue, don't clear auth
+            console.warn('GlobalAuthChecker: Periodic check rate limited, will retry later');
           }
         }
       }, 5 * 60 * 1000); // 5 minutes

@@ -12,8 +12,7 @@ export function LoginForm() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isFormLoading, setIsFormLoading] = useState(true);
-  const [isValidatingSession, setIsValidatingSession] = useState(false);
-  const { login, isLoading, error, clearError, getMe } = useAuth();
+  const { login, isLoading, error, clearError } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
 
@@ -32,36 +31,18 @@ export function LoginForm() {
     try {
       console.log('LoginForm: Attempting login...');
       const result = await login({ email, password }).unwrap();
-      console.log('LoginForm: Login successful, validating session...', result);
+      console.log('LoginForm: Login successful', result);
       
-      // Handle cookie delay - wait for session to be fully established
-      setIsValidatingSession(true);
+      addToast('Login successful! Welcome back.', 'success');
       
-      // Wait a moment for cookies to be set properly
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Validate the session by calling /me endpoint
-      try {
-        const userData = await getMe().unwrap();
-        console.log('LoginForm: Session validated, redirecting based on role', userData);
-        addToast('Login successful! Welcome back.', 'success');
-        
-        // Redirect super admin to dedicated super admin dashboard
-        if (userData.user.role === 'super_admin') {
-          router.push('/super-admin');
-        } else {
-          router.push('/dashboard');
-        }
-      } catch {
-        console.warn('LoginForm: Session validation pending, proceeding with redirect');
-        // Even if validation fails, proceed - GlobalAuthChecker will handle it
+      // Redirect based on user role from login response
+      if (result.user.role === 'super_admin') {
+        router.push('/super-admin');
+      } else {
         router.push('/dashboard');
-      } finally {
-        setIsValidatingSession(false);
       }
     } catch (error) {
       console.error('LoginForm: Login failed:', error);
-      setIsValidatingSession(false);
       // Error is handled by Redux state and displayed below
     }
   };
@@ -95,12 +76,12 @@ export function LoginForm() {
 
   return (
     <div className="relative">
-      {(isLoading || isValidatingSession) && (
+      {isLoading && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
             <span className="text-sm font-medium text-gray-700">
-              {isValidatingSession ? 'Establishing session...' : 'Signing you in...'}
+              Signing you in...
             </span>
           </div>
         </div>
@@ -154,12 +135,12 @@ export function LoginForm() {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isLoading || isValidatingSession}
+            disabled={isLoading}
           >
-            {isLoading || isValidatingSession ? (
+            {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {isValidatingSession ? 'Establishing Session...' : 'Signing In...'}
+                Signing In...
               </div>
             ) : 'Sign In'}
           </Button>

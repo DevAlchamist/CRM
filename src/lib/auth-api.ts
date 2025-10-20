@@ -177,6 +177,11 @@ export const authApi = {
         };
         enhancedError.statusCode = statusCode;
         enhancedError.reason = reason;
+        
+        // Handle rate limiting specifically
+        if (statusCode === 429) {
+          enhancedError.message = 'Too many requests. Please wait a moment and try again.';
+        }
         enhancedError.isTimeout = error.isTimeout;
         enhancedError.isNetworkError = error.isNetworkError;
         
