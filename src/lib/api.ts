@@ -17,6 +17,12 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Development mode flag - set to true to use mock data when backend is not available
+const USE_MOCK_DATA = process.env.NODE_ENV === 'development' && (
+  process.env.NEXT_PUBLIC_USE_MOCK === 'true' || 
+  typeof window !== 'undefined' && localStorage.getItem('useMockData') === 'true'
+);
+
 // Browser-compatible HTTP client with got-like API
 class ApiClient {
   private baseUrl: string;
@@ -26,6 +32,117 @@ class ApiClient {
     this.baseUrl = baseUrl;
     this.defaultHeaders = {
       'Content-Type': 'application/json',
+    };
+  }
+
+  private async handleMockRequest(method: string, url: string, json?: unknown) {
+    console.log('API: Using mock data for:', method, url);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Mock responses for different endpoints
+    if (url === 'auth/login') {
+      const credentials = json as { email: string; password: string };
+      
+      // Mock successful login for demo purposes
+      if (credentials.email && credentials.password) {
+        return {
+          body: {
+            error: false,
+            message: 'Login successful',
+            result: {
+              user: {
+                id: 'mock-user-1',
+                email: credentials.email,
+                name: 'Demo User',
+                role: 'admin',
+                companyId: 'mock-company-1',
+                lastLoginAt: new Date().toISOString(),
+              },
+              tokens: {
+                accessToken: 'mock-access-token-' + Date.now(),
+                refreshToken: 'mock-refresh-token-' + Date.now(),
+              },
+            },
+          },
+          statusCode: 200,
+        };
+      } else {
+        return {
+          body: {
+            error: true,
+            message: 'Invalid credentials',
+            result: null,
+          },
+          statusCode: 401,
+        };
+      }
+    }
+    
+    if (url === 'auth/me') {
+      return {
+        body: {
+          error: false,
+          message: 'User profile retrieved',
+          result: {
+            user: {
+              id: 'mock-user-1',
+              email: 'demo@example.com',
+              name: 'Demo User',
+              role: 'admin',
+              companyId: 'mock-company-1',
+              lastLoginAt: new Date().toISOString(),
+            },
+            company: {
+              id: 'mock-company-1',
+              name: 'Demo Company',
+              industry: 'Technology',
+              size: '10-50',
+              logo: null,
+              website: 'https://demo.com',
+              isActive: true,
+              createdAt: new Date().toISOString(),
+            },
+          },
+        },
+        statusCode: 200,
+      };
+    }
+    
+    if (url === 'auth/logout') {
+      return {
+        body: {
+          error: false,
+          message: 'Logout successful',
+          result: { message: 'Logged out successfully' },
+        },
+        statusCode: 200,
+      };
+    }
+    
+    if (url === 'auth/refresh') {
+      return {
+        body: {
+          error: false,
+          message: 'Token refreshed',
+          result: {
+            accessToken: 'mock-access-token-' + Date.now(),
+            refreshToken: 'mock-refresh-token-' + Date.now(),
+          },
+        },
+        statusCode: 200,
+      };
+    }
+    
+    // Default mock response
+    return {
+      body: {
+        error: false,
+        message: 'Mock response',
+        result: { message: 'This is a mock response' },
+      },
+      statusCode: 200,
     };
   }
 
@@ -39,6 +156,11 @@ class ApiClient {
     } = {}
   ) {
     const { json, headers = {}, timeout = 10000 } = options;
+    
+    // Handle mock data in development mode
+    if (USE_MOCK_DATA) {
+      return this.handleMockRequest(method, url, json);
+    }
     
     // Add auth token if available
     let token = null;
@@ -202,6 +324,17 @@ class ApiClient {
         if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
           const isProduction = process.env.NODE_ENV === 'production';
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'localhost:53321';
+          
+          // In development, try to use mock data as fallback
+          if (!isProduction && !USE_MOCK_DATA) {
+            console.log('API: Backend not available, switching to mock data mode');
+            // Enable mock data mode for this session
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('useMockData', 'true');
+            }
+            // Retry with mock data
+            return this.handleMockRequest(method, url, json);
+          }
           
           let errorMessage = 'Unable to reach server. ';
           if (isProduction) {
