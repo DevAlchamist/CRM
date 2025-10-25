@@ -161,3 +161,85 @@ export interface DashboardStats {
   activeUsers: number;
   monthlyGrowth: number;
 }
+
+// Document Assignment Types
+export type DocumentAccessType = 'READ_ONLY' | 'EDIT';
+
+export interface DocumentAssignment {
+  id: string;
+  documentId: string;
+  userId: string;
+  accessType: DocumentAccessType;
+  assignedBy: string;
+  assignedAt: Date;
+  isActive: boolean;
+  removedAt?: Date;
+  removedBy?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+    role?: 'super_admin' | 'admin' | 'manager' | 'employee';
+    department?: string;
+  };
+  assignedByUser: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  removedByUser?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface DocumentAssignmentStats {
+  total: number;
+  active: number;
+  removed: number;
+  readOnly: number;
+  edit: number;
+}
+
+export interface AssignmentInput {
+  userId: string;
+  accessType?: DocumentAccessType;
+}
+
+// Document Activity Types
+export interface DocumentActivity {
+  id: string;
+  action: string;
+  actionLabel: string;
+  actionIcon: string;
+  actor: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  document?: {
+    id: string;
+    name: string;
+    mimeType: string;
+    url: string;
+  };
+  timestamp: string;
+  details?: Record<string, any>;
+}
+
+export interface DocumentActivityStats {
+  total: number;
+  byAction: Record<string, number>;
+  byDay: Record<string, number>;
+  topUsers: Array<{
+    userId: string;
+    count: number;
+  }>;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+}

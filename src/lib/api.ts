@@ -254,3 +254,299 @@ class ApiClient {
 const api = new ApiClient(API_BASE_URL);
 
 export default api;
+
+// Document Assignment API
+import type { DocumentAssignment, DocumentAssignmentStats, AssignmentInput, DocumentActivity, DocumentActivityStats } from '@/types';
+
+// Document API
+export const documentApi = {
+  // Upload document
+  async upload(formData: FormData) {
+    // Get auth token
+    let token = null;
+    try {
+      token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    } catch (error) {
+      console.warn('Failed to access localStorage:', error);
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    // Don't set Content-Type - let browser set it with boundary for multipart/form-data
+
+    const requestUrl = `${API_BASE_URL}documents`;
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      body: data,
+      statusCode: response.status,
+    } as {
+      body: {
+        success?: boolean;
+        error?: boolean;
+        message: string;
+        data?: {
+          id: string;
+          name: string;
+          mimeType: string;
+          size: number;
+          url: string;
+          createdAt: Date;
+        };
+        result?: {
+          id: string;
+          name: string;
+          mimeType: string;
+          size: number;
+          url: string;
+          externalUrl: string;
+          createdAt: Date;
+        };
+      };
+      statusCode: number;
+    };
+  },
+
+  // Get documents
+  async getAll(params?: { folder?: string; search?: string }) {
+    const queryParams = new URLSearchParams();
+    if (params?.folder) queryParams.append('folder', params.folder);
+    if (params?.search) queryParams.append('search', params.search);
+    
+    const url = `documents${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.body as {
+      error: boolean;
+      message: string;
+      result: {
+        data: Array<{
+          id: string;
+          name: string;
+          mimeType: string;
+          size: number;
+          externalUrl: string;
+          url?: string;
+          folder?: string;
+          tags?: string[];
+          isStarred?: boolean;
+          description?: string;
+          createdAt: string;
+          uploader: {
+            id: string;
+            name: string;
+            email: string;
+            avatar?: string;
+          };
+        }>;
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          pages: number;
+        };
+      };
+    };
+  },
+
+  // Delete document
+  async delete(documentId: string) {
+    const response = await api.delete(`documents/${documentId}`);
+    return response.body as {
+      success: boolean;
+      message: string;
+    };
+  },
+
+  // Update document
+  async update(documentId: string, data: {
+    name?: string;
+    folder?: string;
+    tags?: string[];
+    description?: string;
+    isStarred?: boolean;
+  }) {
+    const response = await api.patch(`documents/${documentId}`, {
+      json: data
+    });
+    return response.body as {
+      success: boolean;
+      message: string;
+      data: object;
+    };
+  },
+
+  // Download document
+  async getDownloadUrl(documentId: string) {
+    const response = await api.get(`documents/${documentId}/download`);
+    return response.body as {
+      success: boolean;
+      data: {
+        downloadUrl: string;
+        name: string;
+        mimeType: string;
+      };
+    };
+  }
+};
+
+export const documentAssignmentApi = {
+  // Assign users to document (single or multiple)
+  async assignUsers(documentId: string, assignments: AssignmentInput[]) {
+    const response = await api.post(`documents/${documentId}/assign`, {
+      json: { assignments }
+    });
+    return response.body as {
+      success: boolean;
+      message: string;
+      data: DocumentAssignment[];
+    };
+  },
+
+  // Remove user assignment
+  async removeAssignment(documentId: string, userId: string) {
+    const response = await api.delete(`documents/${documentId}/assign/${userId}`);
+    return response.body as {
+      success: boolean;
+      message: string;
+      data: DocumentAssignment;
+    };
+  },
+
+  // Update user access type
+  async updateAccessType(documentId: string, userId: string, accessType: 'READ_ONLY' | 'EDIT') {
+    const response = await api.patch(`documents/${documentId}/assign/${userId}`, {
+      json: { accessType }
+    });
+    return response.body as {
+      success: boolean;
+      message: string;
+    };
+  },
+
+  // Get document assignments
+  async getAssignments(documentId: string, includeInactive: boolean = false) {
+    const url = `documents/${documentId}/assignments${includeInactive ? '?includeInactive=true' : ''}`;
+    const response = await api.get(url);
+    return response.body as {
+      success: boolean;
+      data: DocumentAssignment[];
+    };
+  },
+
+  // Get assignment statistics
+  async getStats(documentId: string) {
+    const response = await api.get(`documents/${documentId}/assignments/stats`);
+    return response.body as {
+      success: boolean;
+      data: DocumentAssignmentStats;
+    };
+  },
+
+  // Get my assigned documents
+  async getMyAssignedDocuments(includeInactive: boolean = false) {
+    const url = `documents/my-assigned/list${includeInactive ? '?includeInactive=true' : ''}`;
+    const response = await api.get(url);
+    return response.body as {
+      success: boolean;
+      data: Array<{
+        id: string;
+        name: string;
+        mimeType: string;
+        size: number;
+        createdAt: Date;
+        assignment: {
+          id: string;
+          accessType: 'READ_ONLY' | 'EDIT';
+          assignedAt: Date;
+          assignedBy: {
+            id: string;
+            name: string;
+            email: string;
+          };
+          isActive: boolean;
+        };
+      }>;
+    };
+  }
+};
+
+// Document Activity API
+export const documentActivityApi = {
+  // Get recent document activity
+  async getRecent(limit: number = 20) {
+    const response = await api.get(`documents/activity/recent?limit=${limit}`);
+    return response.body as {
+      success: boolean;
+      data: DocumentActivity[];
+    };
+  },
+
+  // Get activity for a specific document
+  async getDocumentActivity(documentId: string, limit: number = 50) {
+    const response = await api.get(`documents/activity/${documentId}?limit=${limit}`);
+    return response.body as {
+      success: boolean;
+      data: DocumentActivity[];
+    };
+  },
+
+  // Get current user's document activity
+  async getMyActivity(limit: number = 50) {
+    const response = await api.get(`documents/activity/my?limit=${limit}`);
+    return response.body as {
+      success: boolean;
+      data: DocumentActivity[];
+    };
+  },
+
+  // Get activity statistics
+  async getStats(startDate?: string, endDate?: string) {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    
+    const url = `documents/activity/stats${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.body as {
+      success: boolean;
+      data: DocumentActivityStats;
+    };
+  },
+
+  // Track document view
+  async trackView(documentId: string) {
+    const response = await api.post(`documents/activity/${documentId}/view`);
+    return response.body as {
+      success: boolean;
+      message: string;
+    };
+  },
+
+  // Track document download
+  async trackDownload(documentId: string) {
+    const response = await api.post(`documents/activity/${documentId}/download`);
+    return response.body as {
+      success: boolean;
+      message: string;
+    };
+  }
+};
