@@ -4,24 +4,27 @@ const getApiBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  
+
   // In development, use localhost
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:53321/api/';
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:53321/api/";
   }
-  
+
   // Fallback for production without env var
-  console.warn('NEXT_PUBLIC_API_URL not set. Please configure your API URL in environment variables.');
-  return '/api/'; // Assume API routes are in the same domain
+  console.warn(
+    "NEXT_PUBLIC_API_URL not set. Please configure your API URL in environment variables."
+  );
+  return "/api/"; // Assume API routes are in the same domain
 };
 
 const API_BASE_URL = getApiBaseUrl();
 
 // Development mode flag - set to true to use mock data when backend is not available
-const USE_MOCK_DATA = process.env.NODE_ENV === 'development' && (
-  process.env.NEXT_PUBLIC_USE_MOCK === 'true' || 
-  typeof window !== 'undefined' && localStorage.getItem('useMockData') === 'true'
-);
+const USE_MOCK_DATA =
+  process.env.NODE_ENV === "development" &&
+  (process.env.NEXT_PUBLIC_USE_MOCK === "true" ||
+    (typeof window !== "undefined" &&
+      localStorage.getItem("useMockData") === "true"));
 
 // Browser-compatible HTTP client with got-like API
 class ApiClient {
@@ -31,38 +34,38 @@ class ApiClient {
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
     this.defaultHeaders = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
   }
 
   private async handleMockRequest(method: string, url: string, json?: unknown) {
-    console.log('API: Using mock data for:', method, url);
-    
+    console.log("API: Using mock data for:", method, url);
+
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Mock responses for different endpoints
-    if (url === 'auth/login') {
+    if (url === "auth/login") {
       const credentials = json as { email: string; password: string };
-      
+
       // Mock successful login for demo purposes
       if (credentials.email && credentials.password) {
         return {
           body: {
             error: false,
-            message: 'Login successful',
+            message: "Login successful",
             result: {
               user: {
-                id: 'mock-user-1',
+                id: "mock-user-1",
                 email: credentials.email,
-                name: 'Demo User',
-                role: 'admin',
-                companyId: 'mock-company-1',
+                name: "Demo User",
+                role: "admin",
+                companyId: "mock-company-1",
                 lastLoginAt: new Date().toISOString(),
               },
               tokens: {
-                accessToken: 'mock-access-token-' + Date.now(),
-                refreshToken: 'mock-refresh-token-' + Date.now(),
+                accessToken: "mock-access-token-" + Date.now(),
+                refreshToken: "mock-refresh-token-" + Date.now(),
               },
             },
           },
@@ -72,35 +75,35 @@ class ApiClient {
         return {
           body: {
             error: true,
-            message: 'Invalid credentials',
+            message: "Invalid credentials",
             result: null,
           },
           statusCode: 401,
         };
       }
     }
-    
-    if (url === 'auth/me') {
+
+    if (url === "auth/me") {
       return {
         body: {
           error: false,
-          message: 'User profile retrieved',
+          message: "User profile retrieved",
           result: {
             user: {
-              id: 'mock-user-1',
-              email: 'demo@example.com',
-              name: 'Demo User',
-              role: 'admin',
-              companyId: 'mock-company-1',
+              id: "mock-user-1",
+              email: "demo@example.com",
+              name: "Demo User",
+              role: "admin",
+              companyId: "mock-company-1",
               lastLoginAt: new Date().toISOString(),
             },
             company: {
-              id: 'mock-company-1',
-              name: 'Demo Company',
-              industry: 'Technology',
-              size: '10-50',
+              id: "mock-company-1",
+              name: "Demo Company",
+              industry: "Technology",
+              size: "10-50",
               logo: null,
-              website: 'https://demo.com',
+              website: "https://demo.com",
               isActive: true,
               createdAt: new Date().toISOString(),
             },
@@ -109,38 +112,38 @@ class ApiClient {
         statusCode: 200,
       };
     }
-    
-    if (url === 'auth/logout') {
+
+    if (url === "auth/logout") {
       return {
         body: {
           error: false,
-          message: 'Logout successful',
-          result: { message: 'Logged out successfully' },
+          message: "Logout successful",
+          result: { message: "Logged out successfully" },
         },
         statusCode: 200,
       };
     }
-    
-    if (url === 'auth/refresh') {
+
+    if (url === "auth/refresh") {
       return {
         body: {
           error: false,
-          message: 'Token refreshed',
+          message: "Token refreshed",
           result: {
-            accessToken: 'mock-access-token-' + Date.now(),
-            refreshToken: 'mock-refresh-token-' + Date.now(),
+            accessToken: "mock-access-token-" + Date.now(),
+            refreshToken: "mock-refresh-token-" + Date.now(),
           },
         },
         statusCode: 200,
       };
     }
-    
+
     // Default mock response
     return {
       body: {
         error: false,
-        message: 'Mock response',
-        result: { message: 'This is a mock response' },
+        message: "Mock response",
+        result: { message: "This is a mock response" },
       },
       statusCode: 200,
     };
@@ -156,31 +159,34 @@ class ApiClient {
     } = {}
   ) {
     const { json, headers = {}, timeout = 10000 } = options;
-    
+
     // Handle mock data in development mode
     if (USE_MOCK_DATA) {
       return this.handleMockRequest(method, url, json);
     }
-    
+
     // Add auth token if available
     let token = null;
     try {
-      token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
     } catch (error) {
-      console.warn('Failed to access localStorage:', error);
+      console.warn("Failed to access localStorage:", error);
     }
-    
+
     // Prepare authorization headers
     const authHeaders: Record<string, string> = {};
     if (token) {
-      authHeaders['Authorization'] = `Bearer ${token}`;
+      authHeaders["Authorization"] = `Bearer ${token}`;
     }
-    
+
     // Add cookies for server-side requests
     const cookieHeaders: Record<string, string> = {};
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Include cookies in requests for same-origin requests
-      cookieHeaders['credentials'] = 'include';
+      cookieHeaders["credentials"] = "include";
     }
 
     const controller = new AbortController();
@@ -189,8 +195,8 @@ class ApiClient {
     try {
       const requestUrl = `${this.baseUrl}${url}`;
       const requestBody = json ? JSON.stringify(json) : undefined;
-      
-      console.log('Making API request:', {
+
+      console.log("Making API request:", {
         url: requestUrl,
         method,
         headers: {
@@ -210,62 +216,78 @@ class ApiClient {
         },
         body: requestBody,
         signal: controller.signal,
-        credentials: 'include', // Include cookies for authentication
+        credentials: "include", // Include cookies for authentication
       });
 
       clearTimeout(timeoutId);
 
       // Handle token refresh if needed
       if (response.status === 401) {
-        console.log('API: Received 401 Unauthorized, attempting token refresh');
-        
+        console.log("API: Received 401 Unauthorized, attempting token refresh");
+
         try {
-          const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+          const refreshToken =
+            typeof window !== "undefined"
+              ? localStorage.getItem("refreshToken")
+              : null;
           if (refreshToken) {
-            console.log('API: Dispatching token-expired event for automatic refresh');
-            window.dispatchEvent(new CustomEvent('token-expired'));
-            
+            console.log(
+              "API: Dispatching token-expired event for automatic refresh"
+            );
+            window.dispatchEvent(new CustomEvent("token-expired"));
+
             // Try to refresh the token automatically
             try {
-              const { authApi } = await import('./auth-api');
+              const { authApi } = await import("./auth-api");
               const refreshResponse = await authApi.refreshToken();
-              
+
               // Update localStorage with new tokens
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('accessToken', refreshResponse.accessToken);
-                localStorage.setItem('refreshToken', refreshResponse.refreshToken);
+              if (typeof window !== "undefined") {
+                localStorage.setItem(
+                  "accessToken",
+                  refreshResponse.accessToken
+                );
+                localStorage.setItem(
+                  "refreshToken",
+                  refreshResponse.refreshToken
+                );
               }
-              
-              console.log('API: Token refreshed successfully, retrying original request');
-              
+
+              console.log(
+                "API: Token refreshed successfully, retrying original request"
+              );
+
               // Retry the original request with new token
               const newToken = refreshResponse.accessToken;
               const retryResponse = await fetch(requestUrl, {
                 method,
                 headers: {
                   ...this.defaultHeaders,
-                  'Authorization': `Bearer ${newToken}`,
+                  Authorization: `Bearer ${newToken}`,
                   ...headers,
                 },
                 body: requestBody,
                 signal: controller.signal,
-                credentials: 'include',
+                credentials: "include",
               });
-              
+
               if (retryResponse.ok) {
                 const retryData = await retryResponse.json();
-                console.log('API: Retry request successful:', retryData);
+                console.log("API: Retry request successful:", retryData);
                 return {
                   body: retryData,
                   statusCode: retryResponse.status,
                 };
               }
             } catch (refreshError) {
-              console.error('API: Token refresh failed:', refreshError);
+              console.error("API: Token refresh failed:", refreshError);
             }
           }
         } catch (error) {
-          console.warn('Failed to access localStorage for refresh token:', error);
+          console.warn(
+            "Failed to access localStorage for refresh token:",
+            error
+          );
         }
       }
 
@@ -277,9 +299,11 @@ class ApiClient {
         } catch {
           errorData = { message: errorText };
         }
-        
-        const error = new Error(errorData.message || `HTTP ${response.status}`) as Error & { 
-          response: { status: number; body: unknown }; 
+
+        const error = new Error(
+          errorData.message || `HTTP ${response.status}`
+        ) as Error & {
+          response: { status: number; body: unknown };
           statusCode: number;
           isTimeout?: boolean;
         };
@@ -292,7 +316,7 @@ class ApiClient {
       }
 
       const data = await response.json();
-      console.log('API response:', {
+      console.log("API response:", {
         status: response.status,
         data,
       });
@@ -302,12 +326,14 @@ class ApiClient {
       };
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       // Handle timeout and network errors
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          const timeoutError = new Error('Request timeout. Please try again.') as Error & { 
-            isTimeout: boolean; 
+        if (error.name === "AbortError") {
+          const timeoutError = new Error(
+            "Request timeout. Please try again."
+          ) as Error & {
+            isTimeout: boolean;
             statusCode: number;
             response: { status: number; body: unknown };
           };
@@ -315,71 +341,114 @@ class ApiClient {
           timeoutError.statusCode = 408;
           timeoutError.response = {
             status: 408,
-            body: { message: 'Request timeout' },
+            body: { message: "Request timeout" },
           };
           throw timeoutError;
         }
-        
+
         // Network error (server down, no internet, or CORS issues)
-        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
-          const isProduction = process.env.NODE_ENV === 'production';
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'localhost:53321';
-          
+        if (
+          error.message.includes("fetch") ||
+          error.message.includes("network") ||
+          error.message.includes("Failed to fetch")
+        ) {
+          const isProduction = process.env.NODE_ENV === "production";
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "localhost:53321";
+
           // In development, try to use mock data as fallback
           if (!isProduction && !USE_MOCK_DATA) {
-            console.log('API: Backend not available, switching to mock data mode');
+            console.log(
+              "API: Backend not available, switching to mock data mode"
+            );
             // Enable mock data mode for this session
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('useMockData', 'true');
+            if (typeof window !== "undefined") {
+              localStorage.setItem("useMockData", "true");
             }
             // Retry with mock data
             return this.handleMockRequest(method, url, json);
           }
-          
-          let errorMessage = 'Unable to reach server. ';
+
+          let errorMessage = "Unable to reach server. ";
           if (isProduction) {
             errorMessage += `API URL: ${apiUrl}. Please check if the API server is running and accessible.`;
           } else {
-            errorMessage += 'Check your internet connection or try again.';
+            errorMessage += "Check your internet connection or try again.";
           }
-          
-          const networkError = new Error(errorMessage) as Error & { 
-            isNetworkError: boolean; 
+
+          const networkError = new Error(errorMessage) as Error & {
+            isNetworkError: boolean;
             statusCode: number;
             response: { status: number; body: unknown };
           };
-          (networkError as typeof networkError & { isNetworkError: boolean }).isNetworkError = true;
+          (
+            networkError as typeof networkError & { isNetworkError: boolean }
+          ).isNetworkError = true;
           networkError.statusCode = 0;
           networkError.response = {
             status: 0,
-            body: { message: 'Network error', apiUrl },
+            body: { message: "Network error", apiUrl },
           };
           throw networkError;
         }
       }
-      
+
       throw error;
     }
   }
 
-  async get(url: string, options?: { json?: unknown; headers?: Record<string, string>; timeout?: number }) {
-    return this.makeRequest('GET', url, options);
+  async get(
+    url: string,
+    options?: {
+      json?: unknown;
+      headers?: Record<string, string>;
+      timeout?: number;
+    }
+  ) {
+    return this.makeRequest("GET", url, options);
   }
 
-  async post(url: string, options?: { json?: unknown; headers?: Record<string, string>; timeout?: number }) {
-    return this.makeRequest('POST', url, options);
+  async post(
+    url: string,
+    options?: {
+      json?: unknown;
+      headers?: Record<string, string>;
+      timeout?: number;
+    }
+  ) {
+    return this.makeRequest("POST", url, options);
   }
 
-  async put(url: string, options?: { json?: unknown; headers?: Record<string, string>; timeout?: number }) {
-    return this.makeRequest('PUT', url, options);
+  async put(
+    url: string,
+    options?: {
+      json?: unknown;
+      headers?: Record<string, string>;
+      timeout?: number;
+    }
+  ) {
+    return this.makeRequest("PUT", url, options);
   }
 
-  async patch(url: string, options?: { json?: unknown; headers?: Record<string, string>; timeout?: number }) {
-    return this.makeRequest('PATCH', url, options);
+  async patch(
+    url: string,
+    options?: {
+      json?: unknown;
+      headers?: Record<string, string>;
+      timeout?: number;
+    }
+  ) {
+    return this.makeRequest("PATCH", url, options);
   }
 
-  async delete(url: string, options?: { json?: unknown; headers?: Record<string, string>; timeout?: number }) {
-    return this.makeRequest('DELETE', url, options);
+  async delete(
+    url: string,
+    options?: {
+      json?: unknown;
+      headers?: Record<string, string>;
+      timeout?: number;
+    }
+  ) {
+    return this.makeRequest("DELETE", url, options);
   }
 }
 
@@ -389,7 +458,13 @@ const api = new ApiClient(API_BASE_URL);
 export default api;
 
 // Document Assignment API
-import type { DocumentAssignment, DocumentAssignmentStats, AssignmentInput, DocumentActivity, DocumentActivityStats } from '@/types';
+import type {
+  DocumentAssignment,
+  DocumentAssignmentStats,
+  AssignmentInput,
+  DocumentActivity,
+  DocumentActivityStats,
+} from "@/types";
 
 // Document API
 export const documentApi = {
@@ -398,23 +473,26 @@ export const documentApi = {
     // Get auth token
     let token = null;
     try {
-      token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
     } catch (error) {
-      console.warn('Failed to access localStorage:', error);
+      console.warn("Failed to access localStorage:", error);
     }
 
     const headers: Record<string, string> = {};
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
     // Don't set Content-Type - let browser set it with boundary for multipart/form-data
 
     const requestUrl = `${API_BASE_URL}documents`;
     const response = await fetch(requestUrl, {
-      method: 'POST',
+      method: "POST",
       headers: headers,
       body: formData,
-      credentials: 'include',
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -462,40 +540,40 @@ export const documentApi = {
   // Get documents
   async getAll(params?: { folder?: string; search?: string }) {
     const queryParams = new URLSearchParams();
-    if (params?.folder) queryParams.append('folder', params.folder);
-    if (params?.search) queryParams.append('search', params.search);
-    
-    const url = `documents${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    if (params?.folder) queryParams.append("folder", params.folder);
+    if (params?.search) queryParams.append("search", params.search);
+
+    const url = `documents${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
     const response = await api.get(url);
     return response.body as {
       error: boolean;
       message: string;
-      result: {
-        data: Array<{
+      result: Array<{
+        id: string;
+        name: string;
+        mimeType: string;
+        size: number;
+        externalUrl: string;
+        url?: string;
+        folder?: string;
+        tags?: string[];
+        isStarred?: boolean;
+        description?: string;
+        createdAt: string;
+        uploader: {
           id: string;
           name: string;
-          mimeType: string;
-          size: number;
-          externalUrl: string;
-          url?: string;
-          folder?: string;
-          tags?: string[];
-          isStarred?: boolean;
-          description?: string;
-          createdAt: string;
-          uploader: {
-            id: string;
-            name: string;
-            email: string;
-            avatar?: string;
-          };
-        }>;
-        pagination: {
-          page: number;
-          limit: number;
-          total: number;
-          pages: number;
+          email: string;
+          avatar?: string;
         };
+      }>;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
       };
     };
   },
@@ -510,15 +588,18 @@ export const documentApi = {
   },
 
   // Update document
-  async update(documentId: string, data: {
-    name?: string;
-    folder?: string;
-    tags?: string[];
-    description?: string;
-    isStarred?: boolean;
-  }) {
+  async update(
+    documentId: string,
+    data: {
+      name?: string;
+      folder?: string;
+      tags?: string[];
+      description?: string;
+      isStarred?: boolean;
+    }
+  ) {
     const response = await api.patch(`documents/${documentId}`, {
-      json: data
+      json: data,
     });
     return response.body as {
       success: boolean;
@@ -538,14 +619,14 @@ export const documentApi = {
         mimeType: string;
       };
     };
-  }
+  },
 };
 
 export const documentAssignmentApi = {
   // Assign users to document (single or multiple)
   async assignUsers(documentId: string, assignments: AssignmentInput[]) {
     const response = await api.post(`documents/${documentId}/assign`, {
-      json: { assignments }
+      json: { assignments },
     });
     return response.body as {
       success: boolean;
@@ -556,7 +637,9 @@ export const documentAssignmentApi = {
 
   // Remove user assignment
   async removeAssignment(documentId: string, userId: string) {
-    const response = await api.delete(`documents/${documentId}/assign/${userId}`);
+    const response = await api.delete(
+      `documents/${documentId}/assign/${userId}`
+    );
     return response.body as {
       success: boolean;
       message: string;
@@ -565,10 +648,17 @@ export const documentAssignmentApi = {
   },
 
   // Update user access type
-  async updateAccessType(documentId: string, userId: string, accessType: 'READ_ONLY' | 'EDIT') {
-    const response = await api.patch(`documents/${documentId}/assign/${userId}`, {
-      json: { accessType }
-    });
+  async updateAccessType(
+    documentId: string,
+    userId: string,
+    accessType: "READ_ONLY" | "EDIT"
+  ) {
+    const response = await api.patch(
+      `documents/${documentId}/assign/${userId}`,
+      {
+        json: { accessType },
+      }
+    );
     return response.body as {
       success: boolean;
       message: string;
@@ -577,7 +667,9 @@ export const documentAssignmentApi = {
 
   // Get document assignments
   async getAssignments(documentId: string, includeInactive: boolean = false) {
-    const url = `documents/${documentId}/assignments${includeInactive ? '?includeInactive=true' : ''}`;
+    const url = `documents/${documentId}/assignments${
+      includeInactive ? "?includeInactive=true" : ""
+    }`;
     const response = await api.get(url);
     return response.body as {
       success: boolean;
@@ -596,7 +688,9 @@ export const documentAssignmentApi = {
 
   // Get my assigned documents
   async getMyAssignedDocuments(includeInactive: boolean = false) {
-    const url = `documents/my-assigned/list${includeInactive ? '?includeInactive=true' : ''}`;
+    const url = `documents/my-assigned/list${
+      includeInactive ? "?includeInactive=true" : ""
+    }`;
     const response = await api.get(url);
     return response.body as {
       success: boolean;
@@ -608,7 +702,7 @@ export const documentAssignmentApi = {
         createdAt: Date;
         assignment: {
           id: string;
-          accessType: 'READ_ONLY' | 'EDIT';
+          accessType: "READ_ONLY" | "EDIT";
           assignedAt: Date;
           assignedBy: {
             id: string;
@@ -619,7 +713,60 @@ export const documentAssignmentApi = {
         };
       }>;
     };
-  }
+  },
+};
+
+// Users API
+export const usersApi = {
+  // Get all users (with role-based filtering)
+  async getAll(params?: {
+    roles?: string; // e.g., 'employee' or 'employee,manager'
+    limit?: number;
+    page?: number;
+    search?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.roles) queryParams.append("roles", params.roles);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.search) queryParams.append("search", params.search);
+
+    const url = `users${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    const response = await api.get(url);
+    return response.body as {
+      error: boolean;
+      message: string;
+      result: Array<{
+        id: string;
+        email: string;
+        name: string;
+        role: "super_admin" | "admin" | "manager" | "employee";
+        avatar?: string;
+        phone?: string;
+        isActive: boolean;
+        managerId?: string;
+        department?: string;
+        manager?: {
+          id: string;
+          name: string;
+          email: string;
+        };
+      }>;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    };
+  },
+
+  // Get assignable users (employees only)
+  async getAssignableUsers(limit: number = 100) {
+    return this.getAll({ roles: "employee", limit });
+  },
 };
 
 // Document Activity API
@@ -635,7 +782,9 @@ export const documentActivityApi = {
 
   // Get activity for a specific document
   async getDocumentActivity(documentId: string, limit: number = 50) {
-    const response = await api.get(`documents/activity/${documentId}?limit=${limit}`);
+    const response = await api.get(
+      `documents/activity/${documentId}?limit=${limit}`
+    );
     return response.body as {
       success: boolean;
       data: DocumentActivity[];
@@ -654,10 +803,12 @@ export const documentActivityApi = {
   // Get activity statistics
   async getStats(startDate?: string, endDate?: string) {
     const params = new URLSearchParams();
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
-    
-    const url = `documents/activity/stats${params.toString() ? `?${params.toString()}` : ''}`;
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+
+    const url = `documents/activity/stats${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
     const response = await api.get(url);
     return response.body as {
       success: boolean;
@@ -676,10 +827,12 @@ export const documentActivityApi = {
 
   // Track document download
   async trackDownload(documentId: string) {
-    const response = await api.post(`documents/activity/${documentId}/download`);
+    const response = await api.post(
+      `documents/activity/${documentId}/download`
+    );
     return response.body as {
       success: boolean;
       message: string;
     };
-  }
+  },
 };

@@ -25,7 +25,7 @@ import {
   Image as ImageIcon,
   File as FileIcon,
 } from "lucide-react";
-import { documentAssignmentApi } from "@/lib/api";
+import { documentAssignmentApi, usersApi } from "@/lib/api";
 import type {
   DocumentAssignment,
   DocumentAccessType,
@@ -239,7 +239,7 @@ export function EditDocumentModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     // Simulate API call
     setTimeout(() => {
       onSave({
@@ -370,6 +370,10 @@ export function UploadDocumentModal({
     description: "",
     isStarred: false,
   });
+  
+  // Fetch users from API
+  const [users, setUsers] = useState(availableUsers);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -460,7 +464,7 @@ export function UploadDocumentModal({
       return;
     }
 
-    setSelectedFile(file);
+      setSelectedFile(file);
     setFormData({ ...formData, name: file.name });
     generatePreview(file);
   };
@@ -604,8 +608,8 @@ export function UploadDocumentModal({
       // Only close if no errors
       setTimeout(() => {
         if (!error || assignUsers.length === 0) {
-          setIsLoading(false);
-          onClose();
+      setIsLoading(false);
+      onClose();
           resetForm();
         } else {
           setIsLoading(false);
@@ -623,14 +627,14 @@ export function UploadDocumentModal({
   };
 
   const resetForm = () => {
-    setFormData({
+      setFormData({
       name: "",
       folder: "Documents",
       tags: "",
       description: "",
       isStarred: false,
-    });
-    setSelectedFile(null);
+      });
+      setSelectedFile(null);
     setFilePreview(null);
     setUploadProgress(0);
     setAssignUsers([]);
@@ -656,9 +660,35 @@ export function UploadDocumentModal({
   };
 
   const assignedUserIds = new Set(assignUsers.map((a) => a.userId));
-  const availableToAssign = availableUsers.filter(
+  const availableToAssign = users.filter(
     (u) => !assignedUserIds.has(u.id)
   );
+
+  // Fetch users from API when modal opens
+  useEffect(() => {
+    if (isOpen && users.length === 0) {
+      const fetchUsers = async () => {
+        try {
+          setIsLoadingUsers(true);
+          console.log('📥 Fetching assignable users...');
+          const response = await usersApi.getAssignableUsers(100);
+          console.log('✅ Users fetched:', response);
+          
+          // Handle nested response structure: result.data
+          const usersData = response?.result || [];
+          console.log(`✅ Loaded ${usersData.length} users`);
+          setUsers(usersData);
+        } catch (error) {
+          console.error('❌ Error fetching users:', error);
+          // Fallback to availableUsers prop if API fails
+          setUsers(availableUsers);
+        } finally {
+          setIsLoadingUsers(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [isOpen]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -753,21 +783,21 @@ export function UploadDocumentModal({
             ) : (
               <div>
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="file-upload"
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+              id="file-upload"
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.webp"
-                />
-                <label htmlFor="file-upload" className="cursor-pointer">
+            />
+            <label htmlFor="file-upload" className="cursor-pointer">
                   <div className="text-sm text-gray-600">
                     <span className="text-blue-600 hover:text-blue-700 font-medium">
                       Click to upload
                     </span>{" "}
                     or drag and drop
                   </div>
-                </label>
+            </label>
                 <p className="text-xs text-gray-500 mt-2">
                   PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, Images
                 </p>
@@ -875,7 +905,7 @@ export function UploadDocumentModal({
               {/* Add Assignment Form */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <Select
+          <Select
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
                     disabled={availableToAssign.length === 0}
@@ -886,7 +916,7 @@ export function UploadDocumentModal({
                         {user.name} ({user.email})
                       </option>
                     ))}
-                  </Select>
+          </Select>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Select
@@ -910,7 +940,7 @@ export function UploadDocumentModal({
                     Add
                   </Button>
                 </div>
-              </div>
+        </div>
 
               {/* Assigned Users List */}
               {assignUsers.length > 0 && (
@@ -919,7 +949,7 @@ export function UploadDocumentModal({
                     Assigned Users ({assignUsers.length}):
                   </p>
                   {assignUsers.map((assignment) => {
-                    const user = availableUsers.find(
+                    const user = users.find(
                       (u) => u.id === assignment.userId
                     );
                     if (!user) return null;
@@ -936,7 +966,7 @@ export function UploadDocumentModal({
                               {getInitials(user.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
+        <div>
                             <p className="text-xs font-medium text-gray-900">
                               {user.name}
                             </p>
@@ -1066,6 +1096,36 @@ export function ManageAssignmentsModal({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>("");
+  
+  // Fetch users from API
+  const [users, setUsers] = useState(availableUsers);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  // Fetch users from API when modal opens
+  useEffect(() => {
+    if (isOpen && users.length === 0) {
+      const fetchUsers = async () => {
+        try {
+          setIsLoadingUsers(true);
+          console.log('📥 Fetching assignable users for assignments...');
+          const response = await usersApi.getAssignableUsers(100);
+          console.log('✅ Users fetched:', response);
+          
+          // Handle nested response structure: result.data
+          const usersData = response?.result?.data || [];
+          console.log(`✅ Loaded ${usersData.length} users for assignments`);
+          setUsers(usersData);
+        } catch (error) {
+          console.error('❌ Error fetching users:', error);
+          // Fallback to availableUsers prop if API fails
+          setUsers(availableUsers);
+        } finally {
+          setIsLoadingUsers(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && document) {
@@ -1186,7 +1246,7 @@ export function ManageAssignmentsModal({
     assignments?.length > 0
       ? new Set(assignments.filter((a) => a.isActive).map((a) => a.userId))
       : new Set();
-  const availableUsersToAssign = availableUsers.filter(
+  const availableUsersToAssign = users.filter(
     (user) => !activeUserIds.has(user.id)
   );
 
@@ -1301,7 +1361,7 @@ export function ManageAssignmentsModal({
             </Button>
           </div>
           <div className="relative flex-1 sm:max-w-xs">
-            <Input
+          <Input
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -1327,10 +1387,10 @@ export function ManageAssignmentsModal({
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
+        <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select User
-                </label>
+          </label>
                 <Select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
@@ -1343,7 +1403,7 @@ export function ManageAssignmentsModal({
                     </option>
                   ))}
                 </Select>
-              </div>
+        </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Access Type
@@ -1413,7 +1473,7 @@ export function ManageAssignmentsModal({
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
                         <p className="font-medium text-gray-900">
                           {assignment.user.name}
                         </p>

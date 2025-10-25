@@ -28,7 +28,6 @@ import {
   Users,
   Shield
 } from 'lucide-react';
-import { demoUsers } from '@/data/demo';
 import { getInitials, formatDate } from '@/lib/utils';
 import { documentApi, documentAssignmentApi, documentActivityApi } from '@/lib/api';
 
@@ -63,36 +62,49 @@ export default function DocumentsPage() {
       console.log('📥 Fetching documents from API...');
       const response = await documentApi.getAll();
       
-      console.log('✅ Documents fetched:', response);
+      console.log('✅ Full API Response:', JSON.stringify(response, null, 2));
+      console.log('📋 Response structure check:');
+      console.log('  - response:', response ? 'exists' : 'null');
+      console.log('  - response.result:', response?.result ? 'exists' : 'null');
+      console.log('  - response.result.data:', response?.result?.data ? 'exists' : 'null');
+      console.log('  - response.result.data type:', Array.isArray(response?.result?.data) ? 'array' : typeof response?.result?.data);
       
+      console.log("response?.result", response?.result?.length);
       // Handle nested response structure: result.data
-      const docs = response?.result?.data || [];
-      const pagination = response?.result?.pagination;
+      const docs = response?.result || [];
+      const pagination = response?.pagination;
       
       console.log(`📊 Found ${docs.length} documents (Total: ${pagination?.total || docs.length})`);
+      console.log('📦 Raw docs array:', docs);
       
       // Map API response to component format
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedDocs = docs.map((doc: any) => ({
-        id: doc.id,
-        name: doc.name,
-        type: getFileExtension(doc.mimeType || doc.name),
-        size: formatFileSize(doc.size),
-        uploadDate: new Date(doc.createdAt),
-        uploadedBy: doc.uploader || {
-          id: doc.uploadedBy || 'unknown',
-          name: doc.uploader?.name || 'Unknown User',
-          avatar: doc.uploader?.avatar,
-        },
-        folder: doc.folder || 'Documents',
-        tags: doc.tags || [],
-        isStarred: doc.isStarred || false,
-        description: doc.description,
-        url: doc.externalUrl || doc.url,
-      }));
+      const mappedDocs = docs.map((doc: any) => {
+        const mapped = {
+          id: doc.id,
+          name: doc.name,
+          type: getFileExtension(doc.mimeType || doc.name),
+          size: formatFileSize(doc.size),
+          uploadDate: new Date(doc.createdAt),
+          uploadedBy: doc.uploader || {
+            id: doc.uploadedBy || 'unknown',
+            name: doc.uploader?.name || 'Unknown User',
+            avatar: doc.uploader?.avatar,
+          },
+          folder: doc.folder || 'Documents',
+          tags: doc.tags || [],
+          isStarred: doc.isStarred || false,
+          description: doc.description,
+          url: doc.externalUrl || doc.url,
+        };
+        console.log('📄 Mapped document:', mapped);
+        return mapped;
+      });
       
+      console.log('🗂️ All mapped documents:', mappedDocs);
       setDocumentsList(mappedDocs);
       console.log(`✅ Loaded ${mappedDocs.length} documents successfully`);
+      console.log('📊 documentsList state will be set to:', mappedDocs.length, 'documents');
       
       if (pagination) {
         console.log(`📄 Page ${pagination.page} of ${pagination.pages} (${pagination.total} total)`);
@@ -866,12 +878,6 @@ export default function DocumentsPage() {
         isOpen={uploadDocumentModal}
         onClose={() => setUploadDocumentModal(false)}
         onUpload={handleUploadDocument}
-        availableUsers={demoUsers.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar
-        }))}
       />
 
       <ManageAssignmentsModal
@@ -881,14 +887,6 @@ export default function DocumentsPage() {
           setSelectedDocument(null);
         }}
         document={selectedDocument}
-        availableUsers={demoUsers.map(user => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-          role: user.role,
-          department: user.department || 'N/A'
-        }))}
       />
     </DashboardLayout>
   );
