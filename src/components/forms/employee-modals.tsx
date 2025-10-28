@@ -143,6 +143,7 @@ export function AddEditEmployeeModal({ isOpen, onClose, employee, onSave }: AddE
     managerId: employee?.managerId || '',
     managerName: employee?.managerName || '',
     isActive: employee?.isActive ?? true,
+    sendInvitation: true, // Default to sending invitation
   });
 
   const roles = [
@@ -226,6 +227,7 @@ export function AddEditEmployeeModal({ isOpen, onClose, employee, onSave }: AddE
         managerId: employee?.managerId || '',
         managerName: employee?.managerName || '',
         isActive: employee?.isActive ?? true,
+        sendInvitation: true, // Default to sending invitation for new employees
       });
     } else {
       hasFetchedManagers.current = false;
@@ -377,6 +379,56 @@ export function AddEditEmployeeModal({ isOpen, onClose, employee, onSave }: AddE
                   : "Select who this person will report to"
               }
             </p>
+          </div>
+        )}
+
+        {/* Password/Invitation Options - Only for new employees */}
+        {!employee && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 mb-3">Account Setup</h4>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="sendInvitation"
+                  name="passwordOption"
+                  value="invitation"
+                  checked={formData.sendInvitation}
+                  onChange={(e) => setFormData({ ...formData, sendInvitation: e.target.value === 'invitation' })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="sendInvitation" className="ml-2 text-sm text-blue-700">
+                  <span className="font-medium">Send invitation email</span>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Employee will receive an email to set their own password
+                  </p>
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="generatePassword"
+                  name="passwordOption"
+                  value="generate"
+                  checked={!formData.sendInvitation}
+                  onChange={(e) => setFormData({ ...formData, sendInvitation: e.target.value !== 'generate' })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                />
+                <label htmlFor="generatePassword" className="ml-2 text-sm text-blue-700">
+                  <span className="font-medium">Generate temporary password</span>
+                  <p className="text-xs text-blue-600 mt-1">
+                    System will create a temporary password and email it to the employee
+                  </p>
+                </label>
+              </div>
+            </div>
+            
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-xs text-yellow-800">
+                <strong>Security Note:</strong> The employee will be required to change their password on first login for security.
+              </p>
+            </div>
           </div>
         )}
 
