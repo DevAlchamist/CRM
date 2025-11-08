@@ -197,9 +197,9 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg">
+      <div className="bg-indigo-600 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8">
             <div className="flex items-center justify-between">
@@ -262,7 +262,7 @@ export default function SuperAdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* System Health Alert */}
-        <Card className="mb-8 border-l-4 border-l-green-500 bg-gradient-to-r from-green-50 to-white">
+        <Card className="mb-8 border-l-4 border-l-green-500 bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -387,7 +387,7 @@ export default function SuperAdminDashboard() {
         </div>
 
         {/* System Health Monitor */}
-        <Card className="mb-8 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+        <Card className="mb-8 bg-gray-900 text-white">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -494,7 +494,7 @@ export default function SuperAdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">This Month</p>
                   <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.monthlyRevenue)}</p>
                   <p className="text-xs text-green-600 mt-1 flex items-center justify-center">
@@ -502,12 +502,12 @@ export default function SuperAdminDashboard() {
                     +{stats.monthlyGrowth}%
                   </p>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Annual (Projected)</p>
                   <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalRevenue)}</p>
                   <p className="text-xs text-blue-600 mt-1">Based on current rate</p>
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Avg per Company</p>
                   <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.avgRevenuePerCompany)}</p>
                   <p className="text-xs text-purple-600 mt-1">Monthly average</p>
@@ -515,7 +515,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Mini Revenue Chart */}
-              <div className="h-48 bg-gradient-to-b from-gray-50 to-white rounded-lg p-4 border border-gray-200">
+              <div className="h-48 bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-end justify-between h-full space-x-2">
                   {[65, 72, 68, 78, 85, 92, 88, 95, 102, 98, 108, 115].map((value, index) => {
                     const maxValue = 115;
@@ -523,7 +523,7 @@ export default function SuperAdminDashboard() {
                     return (
                       <div key={index} className="flex-1 flex flex-col items-center justify-end">
                         <div
-                          className="w-full bg-gradient-to-t from-purple-500 to-indigo-500 rounded-t-lg hover:from-purple-600 hover:to-indigo-600 transition-all cursor-pointer group relative"
+                          className="w-full bg-indigo-500 rounded-t-lg hover:bg-indigo-600 transition-all cursor-pointer group relative"
                           style={{ height: `${height}%` }}
                         >
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -597,11 +597,11 @@ export default function SuperAdminDashboard() {
                   {companies.slice(0, 5).map((company) => (
                     <div
                       key={company.id}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                      className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => router.push(`/super-admin/companies/${company.id}`)}
                     >
                       <div className="flex items-center space-x-3 flex-1">
-                        <div className="h-10 w-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                        <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
                           {company.name.charAt(0)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -705,7 +705,7 @@ export default function SuperAdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="hover:shadow-xl transition-all cursor-pointer group border-2 border-transparent hover:border-blue-300" onClick={() => router.push('/super-admin/companies')}>
             <CardContent className="p-6">
-              <div className="h-14 w-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="h-14 w-14 bg-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Database className="h-7 w-7 text-white" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-2">Company Management</h3>
@@ -721,7 +721,7 @@ export default function SuperAdminDashboard() {
 
           <Card className="hover:shadow-xl transition-all cursor-pointer group border-2 border-transparent hover:border-purple-300" onClick={() => router.push('/super-admin/analytics')}>
             <CardContent className="p-6">
-              <div className="h-14 w-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="h-14 w-14 bg-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <BarChart3 className="h-7 w-7 text-white" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-2">Analytics & Insights</h3>
@@ -737,7 +737,7 @@ export default function SuperAdminDashboard() {
 
           <Card className="hover:shadow-xl transition-all cursor-pointer group border-2 border-transparent hover:border-orange-300" onClick={() => router.push('/super-admin/system')}>
             <CardContent className="p-6">
-              <div className="h-14 w-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="h-14 w-14 bg-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Settings className="h-7 w-7 text-white" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-2">System Settings</h3>
@@ -753,7 +753,7 @@ export default function SuperAdminDashboard() {
 
           <Card className="hover:shadow-xl transition-all cursor-pointer group border-2 border-transparent hover:border-red-300" onClick={() => router.push('/super-admin/logs')}>
             <CardContent className="p-6">
-              <div className="h-14 w-14 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="h-14 w-14 bg-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <FileText className="h-7 w-7 text-white" />
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-2">System Logs</h3>

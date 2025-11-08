@@ -8,7 +8,8 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-[#E5E7EB] bg-white shadow-sm",
+      // Base glassmorphism card with subtle gradient border and hover lift
+      "rounded-xl bg-white/70 border border-white/40 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-soft border-gradient card-hover",
       className
     )}
     {...props}

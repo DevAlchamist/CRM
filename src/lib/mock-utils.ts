@@ -22,8 +22,18 @@ export const isMockModeEnabled = (): boolean => {
 };
 
 // Add to window for easy access in browser console
+declare global {
+  interface Window {
+    mockUtils?: {
+      enable: () => void;
+      disable: () => void;
+      isEnabled: () => boolean;
+    };
+  }
+}
+
 if (typeof window !== 'undefined') {
-  (window as any).mockUtils = {
+  window.mockUtils = {
     enable: enableMockMode,
     disable: disableMockMode,
     isEnabled: isMockModeEnabled,

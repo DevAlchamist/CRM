@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/providers/ReduxProvider";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Footer } from "@/components/layout/footer";
 import { ToastProvider } from "@/components/ui/toast";
 import { GlobalAuthChecker } from "@/components/auth/GlobalAuthChecker";
 
@@ -33,9 +34,15 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <ToastProvider>
-            <GlobalAuthChecker />
-            <SiteHeader />
-            {children}
+            <div className="relative min-h-screen app-bg flex flex-col">
+              <div className="noise-overlay"></div>
+              <GlobalAuthChecker />
+              <SiteHeader />
+              <main className="relative z-0 flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
           </ToastProvider>
         </ReduxProvider>
       </body>

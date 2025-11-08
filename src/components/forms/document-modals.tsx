@@ -581,12 +581,12 @@ export function UploadDocumentModal({
               `✅ Document uploaded and ${assignUsers.length} user(s) assigned!`
             );
             setError(null); // Clear any previous errors
-          } catch (assignError: any) {
+          } catch (assignError: unknown) {
             console.error("❌ Failed to assign users:", assignError);
             setUploadStatus("Document uploaded (assignment failed)");
             setError(
               `Document uploaded but failed to assign users: ${
-                assignError.message || "Unknown error"
+                assignError instanceof Error ? assignError.message : "Unknown error"
               }`
             );
             // Don't fail the whole upload, continue to show success for document upload
@@ -616,9 +616,9 @@ export function UploadDocumentModal({
           // Keep modal open so user can see the error
         }
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (progressInterval) clearInterval(progressInterval);
-      const errorMessage = err?.message || "Upload failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : "Upload failed. Please try again.";
       console.error("❌ Upload error:", err);
       setError(errorMessage);
       setIsLoading(false);
@@ -1111,8 +1111,20 @@ export function ManageAssignmentsModal({
           const response = await usersApi.getAssignableUsers(100);
           console.log('✅ Users fetched:', response);
           
-          // Handle nested response structure: result.data
-          const usersData = response?.result?.data || [];
+          // Handle different response structures: array, result.data, or result
+          let usersData: Array<{ id: string; name: string; email: string; avatar?: string; role?: string; department?: string }> = [];
+          if (Array.isArray(response)) {
+            usersData = response as Array<{ id: string; name: string; email: string; avatar?: string; role?: string; department?: string }>;
+          } else {
+            const resp = response as unknown as { result?: { data?: unknown[] } | unknown[]; data?: unknown[] };
+            if (Array.isArray(resp?.result)) {
+              usersData = resp.result as Array<{ id: string; name: string; email: string; avatar?: string; role?: string; department?: string }>;
+            } else if (resp?.result && typeof resp.result === 'object' && 'data' in resp.result && Array.isArray(resp.result.data)) {
+              usersData = resp.result.data as Array<{ id: string; name: string; email: string; avatar?: string; role?: string; department?: string }>;
+            } else if (Array.isArray(resp?.data)) {
+              usersData = resp.data as Array<{ id: string; name: string; email: string; avatar?: string; role?: string; department?: string }>;
+            }
+          }
           console.log(`✅ Loaded ${usersData.length} users for assignments`);
           setUsers(usersData);
         } catch (error) {
@@ -1144,7 +1156,16 @@ export function ManageAssignmentsModal({
         document.id,
         showHistory
       );
-      setAssignments(response.data);
+      const resp = response as unknown as { data?: DocumentAssignment[]; result?: { data?: DocumentAssignment[] } | DocumentAssignment[]; success?: boolean };
+      let assignments: DocumentAssignment[] = [];
+      if (Array.isArray(resp?.data)) {
+        assignments = resp.data;
+      } else if (resp?.result && typeof resp.result === 'object' && 'data' in resp.result && Array.isArray(resp.result.data)) {
+        assignments = resp.result.data;
+      } else if (Array.isArray(resp?.result)) {
+        assignments = resp.result;
+      }
+      setAssignments(assignments);
     } catch (err) {
       setError("Failed to load assignments. Please try again.");
       console.error("Error loading assignments:", err);
@@ -1158,7 +1179,37 @@ export function ManageAssignmentsModal({
 
     try {
       const response = await documentAssignmentApi.getStats(document.id);
-      setStats(response.data);
+      const resp = response as unknown as {
+        data?: DocumentAssignmentStats;
+        result?: { data?: DocumentAssignmentStats } | DocumentAssignmentStats;
+        success?: boolean;
+      };
+
+      let stats: DocumentAssignmentStats = {
+        total: 0,
+        active: 0,
+        removed: 0,
+        readOnly: 0,
+        edit: 0,
+      };
+
+      if (resp?.data) {
+        stats = resp.data;
+      } else if (resp?.result && typeof resp.result === "object") {
+        if ("data" in resp.result && resp.result.data) {
+          stats = resp.result.data;
+        } else if (
+          "total" in resp.result &&
+          "active" in resp.result &&
+          "removed" in resp.result &&
+          "readOnly" in resp.result &&
+          "edit" in resp.result
+        ) {
+          stats = resp.result;
+        }
+      }
+
+      setStats(stats);
     } catch (err) {
       console.error("Error loading stats:", err);
     }

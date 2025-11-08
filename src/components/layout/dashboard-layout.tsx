@@ -20,7 +20,7 @@ export function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#F9FAFB]">
+    <div className="flex h-screen app-bg">
       {/* Sidebar */}
       <div className="hidden lg:flex">
         <Sidebar userRole={userRole} />
@@ -40,7 +40,23 @@ export function DashboardLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header title={title} onMenuClick={() => setSidebarOpen(true)} onAddClick={onAddClick} />
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto px-4 py-6">
+          {/* Page banner */}
+          <div className="container mx-auto px-4 pt-6">
+            <div className="rounded-2xl border border-white/40 glass shadow-soft p-5 mb-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-xl font-semibold text-[#0F172A] leading-tight">{title}</h2>
+                  <p className="text-sm text-[#64748B] mt-1">Your latest updates and quick actions at a glance</p>
+                </div>
+                {onAddClick && (
+                  <button onClick={onAddClick} className="inline-flex items-center rounded-xl bg-white/70 backdrop-blur border border-white/50 px-3 py-2 text-sm font-medium text-[#0F172A] hover:bg-white transition-colors">
+                    + New
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="container mx-auto px-4 pb-6">
             {children}
           </div>
         </main>

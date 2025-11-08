@@ -30,22 +30,35 @@ import {
 } from 'lucide-react';
 import { getInitials, formatDate } from '@/lib/utils';
 import { documentApi, documentAssignmentApi, documentActivityApi } from '@/lib/api';
+import { DocumentActivity } from '@/types';
 
 export default function DocumentsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [documentsList, setDocumentsList] = useState<any[]>([]);
+  interface DocumentItem {
+    id: string;
+    name: string;
+    type: string;
+    size: string;
+    uploadDate: Date;
+    uploadedBy: { id: string; name: string; avatar?: string };
+    url?: string;
+    mimeType?: string;
+    folder: string;
+    isStarred: boolean;
+    tags: string[];
+    description?: string;
+  }
+
+  const [documentsList, setDocumentsList] = useState<DocumentItem[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [documentsError, setDocumentsError] = useState<string | null>(null);
   const [documentAssignments, setDocumentAssignments] = useState<Record<string, number>>({});
-  const [assignedToMeDocs, setAssignedToMeDocs] = useState<any[]>([]);
+  const [assignedToMeDocs, setAssignedToMeDocs] = useState<DocumentItem[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string>('All Files');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<DocumentActivity[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
 
   // Modal state
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [viewDocumentModal, setViewDocumentModal] = useState(false);
   const [editDocumentModal, setEditDocumentModal] = useState(false);
@@ -64,10 +77,9 @@ export default function DocumentsPage() {
       
       console.log('✅ Full API Response:', JSON.stringify(response, null, 2));
       console.log('📋 Response structure check:');
-      console.log('  - response:', response ? 'exists' : 'null');
-      console.log('  - response.result:', response?.result ? 'exists' : 'null');
-      console.log('  - response.result.data:', response?.result?.data ? 'exists' : 'null');
-      console.log('  - response.result.data type:', Array.isArray(response?.result?.data) ? 'array' : typeof response?.result?.data);
+      console.log('  - response:', response ? 'exists' : 'null');        
+      console.log('  - response.result:', response?.result ? 'exists' : 'null');                                                                         
+      console.log('  - response.result type:', Array.isArray(response?.result) ? 'array' : typeof response?.result);
       
       console.log("response?.result", response?.result?.length);
       // Handle nested response structure: result.data
@@ -78,24 +90,25 @@ export default function DocumentsPage() {
       console.log('📦 Raw docs array:', docs);
       
       // Map API response to component format
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedDocs = docs.map((doc: any) => {
-        const mapped = {
-          id: doc.id,
-          name: doc.name,
-          type: getFileExtension(doc.mimeType || doc.name),
-          size: formatFileSize(doc.size),
-          uploadDate: new Date(doc.createdAt),
-          uploadedBy: doc.uploader || {
-            id: doc.uploadedBy || 'unknown',
-            name: doc.uploader?.name || 'Unknown User',
-            avatar: doc.uploader?.avatar,
+      const mappedDocs = docs.map((doc: Record<string, unknown>) => {
+        const mapped: DocumentItem = {
+          id: String(doc.id || ''),
+          name: String(doc.name || ''),
+          type: getFileExtension(String(doc.mimeType || doc.name || '')),
+          size: formatFileSize(Number(doc.size || 0)),
+          uploadDate: new Date(String(doc.createdAt || Date.now())),
+          uploadedBy: (doc.uploader as { id?: string; name?: string; avatar?: string }) ? {
+            id: String((doc.uploader as { id?: string })?.id || (doc.uploadedBy as string) || 'unknown'),
+            name: String((doc.uploader as { name?: string })?.name || 'Unknown User'),
+            avatar: (doc.uploader as { avatar?: string })?.avatar,
+          } : {
+            id: String((doc.uploadedBy as string) || 'unknown'),
+            name: 'Unknown User',
           },
-          folder: doc.folder || 'Documents',
-          tags: doc.tags || [],
-          isStarred: doc.isStarred || false,
-          description: doc.description,
-          url: doc.externalUrl || doc.url,
+          folder: String(doc.folder || 'Documents'),
+          isStarred: Boolean(doc.isStarred || false),
+          tags: Array.isArray(doc.tags) ? doc.tags.map(t => String(t)) : [],
+          url: String(doc.externalUrl || doc.url || ''),
         };
         console.log('📄 Mapped document:', mapped);
         return mapped;
@@ -170,7 +183,7 @@ export default function DocumentsPage() {
   };
 
   // Fetch all assignments for all documents
-  const fetchAllAssignments = async (docs: any[]) => {
+  const fetchAllAssignments = async (docs: DocumentItem[]) => {
     const assignmentsMap: Record<string, number> = {};
     
     // Fetch assignments for each document in parallel
@@ -191,24 +204,24 @@ export default function DocumentsPage() {
       
       console.log('✅ Assigned documents:', response);
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedDocs = (response.data || []).map((doc: any) => ({
-        id: doc.id,
-        name: doc.name,
-        type: getFileExtension(doc.mimeType || doc.name),
-        size: formatFileSize(doc.size),
-        uploadDate: new Date(doc.createdAt),
-        uploadedBy: doc.uploader || {
-          id: doc.uploadedBy || 'unknown',
-          name: doc.uploader?.name || 'Unknown User',
-          avatar: doc.uploader?.avatar,
+      const mappedDocs = (response.data || []).map((doc: Record<string, unknown>): DocumentItem => ({
+        id: String(doc.id || ''),
+        name: String(doc.name || ''),
+        type: getFileExtension(String(doc.mimeType || doc.name || '')),
+        size: formatFileSize(Number(doc.size || 0)),
+        uploadDate: new Date(String(doc.createdAt || Date.now())),
+        uploadedBy: (doc.uploader as { id?: string; name?: string; avatar?: string }) ? {
+          id: String((doc.uploader as { id?: string })?.id || (doc.uploadedBy as string) || 'unknown'),
+          name: String((doc.uploader as { name?: string })?.name || 'Unknown User'),
+          avatar: (doc.uploader as { avatar?: string })?.avatar,
+        } : {
+          id: String((doc.uploadedBy as string) || 'unknown'),
+          name: 'Unknown User',
         },
-        folder: doc.folder || 'Documents',
-        tags: doc.tags || [],
-        isStarred: doc.isStarred || false,
-        description: doc.description,
-        url: doc.externalUrl || doc.url,
-        assignment: doc.assignment, // Include assignment info
+        folder: String(doc.folder || 'Documents'),
+        isStarred: Boolean(doc.isStarred || false),
+        tags: Array.isArray(doc.tags) ? doc.tags.map(t => String(t)) : [],
+        url: String(doc.externalUrl || doc.url || ''),
       }));
       
       setAssignedToMeDocs(mappedDocs);
@@ -254,8 +267,7 @@ export default function DocumentsPage() {
   }, [selectedFolder]);
 
   // Event handlers
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDeleteDocument = (document: any) => {
+  const handleDeleteDocument = (document: DocumentItem) => {
     setSelectedDocument(document);
     setDeleteModalOpen(true);
   };
@@ -277,21 +289,21 @@ export default function DocumentsPage() {
         setDeleteModalOpen(false);
         
         alert('Document deleted successfully!');
-      } catch (error) {
-        console.error('❌ Error deleting document:', error);
+      } catch (err) {
+        console.error('❌ Error deleting document:', err);
         alert('Failed to delete document. Please try again.');
       }
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSaveDocument = (documentData: any) => {
+  const handleSaveDocument = (documentData: Partial<DocumentItem>) => {
     console.log('Saving document:', documentData);
     // In a real app, this would make an API call
+    // Refresh documents after save
+    fetchDocuments();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleUploadDocument = async (fileData: any) => {
+  const handleUploadDocument = async (fileData: FormData) => {
     try {
       console.log('Uploading document:', fileData);
       
@@ -324,14 +336,12 @@ export default function DocumentsPage() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleManageAccess = (document: any) => {
+  const handleManageAccess = (document: DocumentItem) => {
     setSelectedDocument(document);
     setManageAccessModal(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleViewDocument = async (document: any) => {
+  const handleViewDocument = async (document: DocumentItem) => {
     console.log('👁️ Viewing document:', document);
     
     // Track view activity (don't wait for it, run in background)
@@ -355,29 +365,28 @@ export default function DocumentsPage() {
     }, 500);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDownloadDocument = async (document: any) => {
+  const handleDownloadDocument = async (docItem: DocumentItem) => {
     try {
-      console.log('⬇️ Downloading document:', document);
+      console.log('⬇️ Downloading document:', docItem);
       
       // Track download activity (run in background, don't wait)
-      documentActivityApi.trackDownload(document.id).catch(error => {
+      documentActivityApi.trackDownload(docItem.id).catch(error => {
         console.error('Failed to track document download:', error);
         // Silent fail - tracking shouldn't break UX
       });
       
       // Get download URL from API
-      const response = await documentApi.getDownloadUrl(document.id);
+      const response = await documentApi.getDownloadUrl(docItem.id);
       
       if (response.data?.downloadUrl) {
         // Create a temporary link and trigger download
-        const link = document.createElement('a');
+        const link = window.document.createElement('a');
         link.href = response.data.downloadUrl;
-        link.download = response.data.name || document.name;
+        link.download = response.data.name || docItem.name;
         link.target = '_blank';
-        document.body.appendChild(link);
+        window.document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        window.document.body.removeChild(link);
         
         console.log('✅ Download initiated');
         
@@ -387,13 +396,13 @@ export default function DocumentsPage() {
         }, 500);
       } else {
         // Fallback: use document URL directly
-        window.open(document.url, '_blank', 'noopener,noreferrer');
+        window.open(docItem.url, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
       console.error('❌ Error downloading document:', error);
       // Fallback: open URL directly
-      if (document.url) {
-        window.open(document.url, '_blank', 'noopener,noreferrer');
+      if (docItem.url) {
+        window.open(docItem.url, '_blank', 'noopener,noreferrer');
       } else {
         alert('Failed to download document. Please try again.');
       }
@@ -414,8 +423,8 @@ export default function DocumentsPage() {
   // Filter documents based on search term and selected folder
   const documentsToFilter = getDocumentsForFolder();
   const filteredDocuments = documentsToFilter.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||        
+    (doc.tags && doc.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   // Dynamic folder counts based on fetched documents
@@ -502,7 +511,7 @@ export default function DocumentsPage() {
                 </h3>
                 <p className="text-sm text-gray-600 mb-2">
                   Control who can access your documents with READ_ONLY or EDIT permissions. 
-                  Click the "Access" button on any document to manage user assignments.
+                  Click the &quot;Access&quot; button on any document to manage user assignments.
                 </p>
                 <div className="flex items-center space-x-4 text-xs text-gray-500">
                   <span className="flex items-center">
@@ -727,18 +736,20 @@ export default function DocumentsPage() {
                         </div>
                       </div>
                       
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {doc.tags.slice(0, 2).map((tag: string) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {doc.tags.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{doc.tags.length - 2}
-                          </Badge>
-                        )}
-                      </div>
+                      {doc.tags && doc.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {doc.tags.slice(0, 2).map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {doc.tags.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{doc.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                       
                       <div className="grid grid-cols-2 gap-2">
                         <Button 
@@ -829,7 +840,7 @@ export default function DocumentsPage() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => window.open(activity.document.url, '_blank', 'noopener,noreferrer')}
+                        onClick={() => window.open(activity.document?.url || '', '_blank', 'noopener,noreferrer')}
                         title="View document"
                       >
                         <Eye className="h-4 w-4" />

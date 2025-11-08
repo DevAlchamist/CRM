@@ -82,18 +82,18 @@ export function Sidebar({ userRole }: SidebarProps) {
     : roleFiltered;
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-white border-r border-[#E5E7EB]">
+    <div className="flex h-screen w-64 flex-col glass border-r border-white/40">
       {/* Company Logo/Name */}
-      <div className="flex h-16 items-center border-b border-[#E5E7EB] px-6">
+      <div className="flex h-16 items-center border-b border-white/40 px-6">
         <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-md bg-[#2563EB] flex items-center justify-center">
+          <div className="h-8 w-8 rounded-xl bg-[#2563EB] flex items-center justify-center shadow-soft">
             <Building2 className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-[#111827]">
+            <h1 className="text-sm font-semibold text-[#0F172A]">
               {company?.name || demoCompany.name}
             </h1>
-            <p className="text-xs text-[#6B7280]">CRM Platform</p>
+            <p className="text-xs text-[#64748B]">CRM Platform</p>
           </div>
         </div>
       </div>
@@ -107,10 +107,10 @@ export function Sidebar({ userRole }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center space-x-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-[#2563EB] text-white'
-                  : 'text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#111827]'
+                  ? 'bg-gradient-to-r from-[#2563EB] to-[#1E40AF] text-white shadow-soft'
+                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-white/50'
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -121,26 +121,26 @@ export function Sidebar({ userRole }: SidebarProps) {
       </nav>
 
       {/* User Profile */}
-      <div className="border-t border-[#E5E7EB] p-4">
+      <div className="border-t border-white/40 p-4">
         <div className="flex items-center space-x-3">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-8 w-8 ring-2 ring-white/60">
             <AvatarImage src={undefined} />
             <AvatarFallback>
               {currentUser.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#111827] truncate">
+            <p className="text-sm font-medium text-[#0F172A] truncate">
               {currentUser.name}
             </p>
-            <p className="text-xs text-[#6B7280] truncate">
+            <p className="text-xs text-[#64748B] truncate">
               {currentUser.email}
             </p>
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8"
+            className="h-8 w-8 rounded-xl"
             onClick={handleLogout}
             disabled={isLoading}
             title="Logout"

@@ -1,340 +1,347 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Target, BarChart3, MessageSquare, Calendar, FileText, Shield, Zap, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Users, 
+  Target, 
+  BarChart3, 
+  MessageSquare, 
+  Calendar, 
+  FileText, 
+  Shield, 
+  Zap, 
+  ArrowRight, 
+  CheckCircle2,
+  Sparkles,
+  TrendingUp,
+  Globe,
+  Lock,
+  Play,
+  Rocket,
+  ChevronRight,
+  Brain,
+  Clock,
+  Award,
+} from 'lucide-react';
 
 export default function FeaturesPage() {
-  const features = [
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const mainFeatures = [
     {
-      icon: Users,
-      title: 'Customer Management',
-      description: 'Organize and track all your customer relationships in one place with detailed profiles, interaction history, and custom fields.',
-      highlights: ['360° customer view', 'Interaction timeline', 'Custom fields', 'Bulk import/export']
+      icon: Brain,
+      title: 'AI-Powered Intelligence',
+      description: 'Complete 360° view of every customer with AI-powered insights, interaction history, and predictive analytics.',
+      highlights: ['Unified customer profiles', 'AI-powered insights', 'Interaction timeline', 'Custom fields & tags'],
+      bgClass: 'bg-blue-600',
+      stat: '3.2x faster',
+      image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop',
     },
     {
       icon: Target,
-      title: 'Lead Tracking',
-      description: 'Follow leads through your sales pipeline with visual kanban boards, automated workflows, and stage-based tracking.',
-      highlights: ['Visual pipeline', 'Automated workflows', 'Stage tracking', 'Probability scoring']
+      title: 'Smart Pipeline Management',
+      description: 'Visual kanban boards with automated workflows, lead scoring, and stage-based tracking.',
+      highlights: ['Visual pipeline', 'Auto lead scoring', 'Workflow automation', 'Probability tracking'],
+      bgClass: 'bg-purple-600',
+      stat: '+35% close rate',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
     },
     {
       icon: BarChart3,
-      title: 'Analytics & Reports',
-      description: 'Get insights into your sales performance with detailed reports, forecasting, and real-time dashboards.',
-      highlights: ['Real-time dashboards', 'Sales forecasting', 'Custom reports', 'Performance metrics']
+      title: 'Advanced Analytics',
+      description: 'Real-time dashboards, custom reports, and forecasting to drive data-driven decisions.',
+      highlights: ['Real-time dashboards', 'Custom reports', 'Sales forecasting', 'Performance metrics'],
+      bgClass: 'bg-orange-600',
+      stat: 'Real-time data',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+    },
+    {
+      icon: Zap,
+      title: 'Intelligent Automation',
+      description: 'No-code automation engine that streamlines repetitive tasks and workflows.',
+      highlights: ['Workflow builder', 'Email sequences', 'Auto-assignment', 'Smart triggers'],
+      bgClass: 'bg-green-600',
+      stat: 'Save 10hrs/week',
+      image: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=600&fit=crop',
     },
     {
       icon: MessageSquare,
       title: 'Team Collaboration',
-      description: 'Communicate and collaborate with your team seamlessly with built-in messaging, activity feeds, and notifications.',
-      highlights: ['Team messaging', 'Activity feeds', 'Smart notifications', 'File sharing']
-    },
-    {
-      icon: Calendar,
-      title: 'Task Management',
-      description: 'Stay organized with built-in task and activity management, calendar integration, and automated reminders.',
-      highlights: ['Task automation', 'Calendar sync', 'Reminder system', 'Progress tracking']
+      description: 'Built-in messaging, activity feeds, and notifications to keep teams aligned.',
+      highlights: ['Team messaging', 'Activity feeds', 'Smart notifications', 'File sharing'],
+      bgClass: 'bg-indigo-600',
+      stat: '2x faster',
+      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop',
     },
     {
       icon: Shield,
-      title: 'Security & Compliance',
-      description: 'Enterprise-grade security with data encryption, role-based access control, and compliance certifications.',
-      highlights: ['Data encryption', 'Role-based access', 'Audit logs', 'GDPR compliance']
+      title: 'Enterprise Security',
+      description: 'Bank-level encryption, role-based access, and compliance certifications.',
+      highlights: ['End-to-end encryption', 'Role-based access', 'Audit logs', 'GDPR compliant'],
+      bgClass: 'bg-teal-600',
+      stat: '99.99% uptime',
+      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
     },
-    {
-      icon: Zap,
-      title: 'Automation',
-      description: 'Automate repetitive tasks and workflows to save time and ensure consistency across your sales process.',
-      highlights: ['Workflow automation', 'Email sequences', 'Lead scoring', 'Auto-assignment']
-    },
-    {
-      icon: FileText,
-      title: 'Document Management',
-      description: 'Store, organize, and share documents securely with version control and access permissions.',
-      highlights: ['Secure storage', 'Version control', 'Access permissions', 'Document templates']
-    }
   ];
 
+  const integrations = [
+    'Gmail', 'Outlook', 'Slack', 'Teams', 'Zoom', 'Google Calendar',
+    'Stripe', 'PayPal', 'QuickBooks', 'Xero', 'Mailchimp', 'HubSpot',
+    'Salesforce', 'Zapier', 'Shopify', 'WooCommerce', 'Intercom', 'Drift'
+  ];
+
+  const quickStats = [
+    { icon: Zap, value: '<100ms', label: 'Response Time', color: 'yellow' },
+    { icon: TrendingUp, value: '+23%', label: 'Revenue Growth', color: 'green' },
+    { icon: Users, value: '10K+', label: 'Active Users', color: 'blue' },
+    { icon: Award, value: '4.9/5', label: 'User Rating', color: 'purple' },
+  ];
+
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px',
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('opacity-100', 'translate-y-0');
+          entry.target.classList.remove('opacity-0', 'translate-y-8');
+        }
+      });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-[#F9FAFB] to-white">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-[#111827] mb-6">
-            Powerful features for modern businesses
-          </h1>
-          <p className="text-xl text-[#6B7280] mb-8 max-w-3xl mx-auto">
-            Everything you need to manage customers, track leads, and grow your business. 
-            Our comprehensive CRM platform provides all the tools you need to streamline your sales process.
-          </p>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Hero Section - Dynamic */}
+      <section className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
+          <Image
+            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&h=1080&fit=crop"
+            alt="Features and analytics"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/90 via-blue-800/80 to-blue-900/90"></div>
         </div>
-      </section>
 
-      {/* Features Grid */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {features.map((feature, index) => (
-              <Card 
-                key={index} 
-                className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
-              >
-                <CardHeader>
-                  <div className="h-14 w-14 bg-gradient-to-br from-[#2563EB] to-[#1E40AF] rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
-                    <feature.icon className="h-7 w-7 text-white" />
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 backdrop-blur-sm rounded-full border border-blue-400/30 mb-6">
+                <Sparkles className="h-4 w-4 text-blue-300 animate-pulse" />
+                <span className="text-sm font-medium text-blue-100">50+ Powerful Features</span>
+                <TrendingUp className="h-4 w-4 text-green-400" />
+              </div>
+              
+              <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-white leading-tight">
+                Built for Teams Who
+                <br />
+                <span className="relative inline-block">
+                  <span className="relative z-10 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                    Move Fast
+                  </span>
+                  <span className="absolute -bottom-2 left-0 right-0 h-3 bg-blue-500/30 blur-xl"></span>
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-3xl mx-auto leading-relaxed">
+                Everything you need to manage customers, automate workflows, and <span className="font-semibold text-white">drive revenue growth</span>—all in one powerful platform.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="group px-8 py-6 text-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 font-semibold"
+                  asChild
+                >
+                  <Link href="/signup" className="flex items-center">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="px-8 py-6 text-lg border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300"
+                  asChild
+                >
+                  <Link href="/pricing" className="flex items-center">
+                    <Play className="mr-2 h-5 w-5" />
+                    Watch Demo
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {quickStats.map((stat, index) => (
+                <div 
+                  key={index}
+                  className="bg-white/10 backdrop-blur-xl rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+                >
+                  <div className={`inline-flex p-3 rounded-xl ${
+                    stat.color === 'yellow' ? 'bg-yellow-600/20' :
+                    stat.color === 'green' ? 'bg-green-600/20' :
+                    stat.color === 'blue' ? 'bg-blue-600/20' : 'bg-purple-600/20'
+                  } mb-3 group-hover:scale-110 transition-transform`}>
+                    <stat.icon className={`h-6 w-6 ${
+                      stat.color === 'yellow' ? 'text-yellow-300' :
+                      stat.color === 'green' ? 'text-green-300' :
+                      stat.color === 'blue' ? 'text-blue-300' : 'text-purple-300'
+                    }`} />
                   </div>
-                  <CardTitle className="text-xl mb-3">{feature.title}</CardTitle>
-                  <CardDescription className="text-base leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {feature.highlights.map((highlight, highlightIndex) => (
-                      <li key={highlightIndex} className="flex items-start">
-                        <div className="h-2 w-2 bg-[#10B981] rounded-full mr-3 mt-1.5 flex-shrink-0"></div>
-                        <span className="text-sm text-[#6B7280]">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className="text-sm text-blue-200">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <ChevronRight className="h-6 w-6 text-white/60 rotate-90" />
         </div>
       </section>
 
-      {/* Integration Section */}
-      <section className="py-20 bg-[#F9FAFB]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">
-              Integrates with your favorite tools
-            </h2>
-            <p className="text-xl text-[#6B7280] max-w-2xl mx-auto">
-              Connect CRM Pro with the tools you already use to create a seamless workflow.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6 max-w-5xl mx-auto">
-            {[
-              'Gmail', 'Outlook', 'Slack', 'Teams', 'Zoom', 'Google Calendar',
-              'Stripe', 'PayPal', 'QuickBooks', 'Xero', 'Mailchimp', 'HubSpot'
-            ].map((tool, index) => (
+      {/* Main Features Grid - Enhanced */}
+      <section className="py-24 bg-white relative">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-32">
+            {mainFeatures.map((feature, index) => (
               <div 
-                key={index} 
-                className="group hover:scale-105 transition-transform duration-200"
+                key={index}
+                className={`fade-in opacity-0 translate-y-8 transition-all duration-700 max-w-6xl mx-auto ${
+                  index % 2 === 0 ? '' : 'md:flex-row-reverse'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <div className="h-20 bg-white rounded-xl flex items-center justify-center shadow-md border border-[#E5E7EB] group-hover:shadow-lg group-hover:border-[#2563EB] transition-all duration-200">
-                  <span className="text-sm font-semibold text-[#111827] px-2 text-center">{tool}</span>
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                  <div className={index % 2 === 0 ? '' : 'md:order-2'}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`inline-flex p-4 rounded-2xl ${feature.bgClass} transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                        <feature.icon className="h-8 w-8 text-white" />
+                      </div>
+                      <Badge className="bg-green-100 text-green-700 border-0">
+                        {feature.stat}
+                      </Badge>
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+                      {feature.title}
+                    </h2>
+                    <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                      {feature.description}
+                    </p>
+                    <ul className="space-y-3 mb-6">
+                      {feature.highlights.map((highlight, idx) => (
+                        <li key={idx} className="flex items-start group">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                          <span className="text-gray-700">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button 
+                      variant="outline" 
+                      className="group border-2 hover:bg-gray-50"
+                      asChild
+                    >
+                      <Link href="/signup" className="flex items-center">
+                        Learn More
+                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className={`relative rounded-3xl overflow-hidden shadow-2xl group hover:scale-105 transition-transform duration-300 ${index % 2 === 0 ? '' : 'md:order-1'}`}>
+                    <div className="aspect-video relative">
+                      <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                    {/* Floating Badge */}
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-sm font-semibold text-gray-900">
+                      Live Preview
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-          
-          <div className="mt-12 text-center">
-            <p className="text-[#6B7280] mb-4">And 100+ more integrations available</p>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/contact">
-                Request Integration
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* Feature Comparison */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">
-              Compare Plans & Features
+      {/* Additional Features - Enhanced */}
+      <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 fade-in opacity-0 translate-y-8 transition-all duration-700">
+            <Badge className="mb-4 px-4 py-1 bg-blue-100 text-blue-700 border-0">
+              Complete Solution
+            </Badge>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+              Everything You Need in <span className="text-blue-600">One Platform</span>
             </h2>
-            <p className="text-xl text-[#6B7280] max-w-2xl mx-auto">
-              See which features are available in each plan
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Powerful features designed to help you succeed
             </p>
           </div>
-          
-          <div className="max-w-6xl mx-auto">
-            {/* Mobile View - Cards */}
-            <div className="block lg:hidden space-y-6">
-              {['Starter', 'Professional', 'Enterprise'].map((planName) => (
-                <Card key={planName} className="overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-[#2563EB] to-[#1E40AF] text-white">
-                    <CardTitle className="text-xl">{planName}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    {[
-                      { name: 'Customer Management', starter: true, pro: true, enterprise: true },
-                      { name: 'Lead Tracking', starter: true, pro: true, enterprise: true },
-                      { name: 'Basic Analytics', starter: true, pro: true, enterprise: true },
-                      { name: 'Advanced Reports', starter: false, pro: true, enterprise: true },
-                      { name: 'Team Collaboration', starter: '3 users', pro: '10 users', enterprise: 'Unlimited' },
-                      { name: 'Task Automation', starter: false, pro: true, enterprise: true },
-                      { name: 'Custom Workflows', starter: false, pro: true, enterprise: true },
-                      { name: 'API Access', starter: false, pro: true, enterprise: true },
-                      { name: 'Priority Support', starter: false, pro: true, enterprise: true },
-                      { name: 'Custom Integrations', starter: false, pro: false, enterprise: true },
-                      { name: 'Dedicated Account Manager', starter: false, pro: false, enterprise: true },
-                      { name: 'White Label Option', starter: false, pro: false, enterprise: true }
-                    ].map((feature, index) => {
-                      const value = planName === 'Starter' ? feature.starter : planName === 'Professional' ? feature.pro : feature.enterprise;
-                      return (
-                        <div key={index} className="flex items-center justify-between py-3 border-b border-[#E5E7EB] last:border-0">
-                          <span className="text-[#111827] text-sm">{feature.name}</span>
-                          <div>
-                            {typeof value === 'boolean' ? (
-                              value ? (
-                                <CheckCircle2 className="h-5 w-5 text-[#10B981]" />
-                              ) : (
-                                <span className="text-[#9CA3AF] text-xl">—</span>
-                              )
-                            ) : (
-                              <span className="text-[#111827] font-medium text-sm">{value}</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            {/* Desktop View - Table */}
-            <div className="hidden lg:block overflow-x-auto rounded-lg border border-[#E5E7EB] shadow-lg">
-              <table className="w-full border-collapse bg-white">
-                <thead>
-                  <tr className="bg-gradient-to-r from-[#F9FAFB] to-white">
-                    <th className="text-left py-5 px-6 font-bold text-[#111827] border-b-2 border-[#E5E7EB]">
-                      Feature
-                    </th>
-                    <th className="text-center py-5 px-6 font-bold text-[#111827] border-b-2 border-[#E5E7EB]">
-                      Starter
-                    </th>
-                    <th className="text-center py-5 px-6 font-bold text-[#111827] border-b-2 border-[#E5E7EB] bg-blue-50">
-                      <div className="flex flex-col items-center">
-                        <span>Professional</span>
-                        <span className="text-xs font-normal text-[#2563EB] mt-1">Most Popular</span>
-                      </div>
-                    </th>
-                    <th className="text-center py-5 px-6 font-bold text-[#111827] border-b-2 border-[#E5E7EB]">
-                      Enterprise
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { name: 'Customer Management', starter: true, pro: true, enterprise: true },
-                    { name: 'Lead Tracking', starter: true, pro: true, enterprise: true },
-                    { name: 'Basic Analytics', starter: true, pro: true, enterprise: true },
-                    { name: 'Advanced Reports', starter: false, pro: true, enterprise: true },
-                    { name: 'Team Collaboration', starter: '3 users', pro: '10 users', enterprise: 'Unlimited' },
-                    { name: 'Task Automation', starter: false, pro: true, enterprise: true },
-                    { name: 'Custom Workflows', starter: false, pro: true, enterprise: true },
-                    { name: 'API Access', starter: false, pro: true, enterprise: true },
-                    { name: 'Priority Support', starter: false, pro: true, enterprise: true },
-                    { name: 'Custom Integrations', starter: false, pro: false, enterprise: true },
-                    { name: 'Dedicated Account Manager', starter: false, pro: false, enterprise: true },
-                    { name: 'White Label Option', starter: false, pro: false, enterprise: true }
-                  ].map((feature, index) => (
-                    <tr key={index} className="border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors">
-                      <td className="py-4 px-6 text-[#111827] font-medium">{feature.name}</td>
-                      <td className="py-4 px-6 text-center">
-                        {typeof feature.starter === 'boolean' ? (
-                          feature.starter ? (
-                            <CheckCircle2 className="h-5 w-5 text-[#10B981] mx-auto" />
-                          ) : (
-                            <span className="text-[#9CA3AF] text-2xl">—</span>
-                          )
-                        ) : (
-                          <span className="text-[#111827] font-medium text-sm">{feature.starter}</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/30">
-                        {typeof feature.pro === 'boolean' ? (
-                          feature.pro ? (
-                            <CheckCircle2 className="h-5 w-5 text-[#10B981] mx-auto" />
-                          ) : (
-                            <span className="text-[#9CA3AF] text-2xl">—</span>
-                          )
-                        ) : (
-                          <span className="text-[#111827] font-medium text-sm">{feature.pro}</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        {typeof feature.enterprise === 'boolean' ? (
-                          feature.enterprise ? (
-                            <CheckCircle2 className="h-5 w-5 text-[#10B981] mx-auto" />
-                          ) : (
-                            <span className="text-[#9CA3AF] text-2xl">—</span>
-                          )
-                        ) : (
-                          <span className="text-[#111827] font-medium text-sm">{feature.enterprise}</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <Button size="lg" asChild>
-                <Link href="/pricing">
-                  View Full Pricing Details
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-[#F9FAFB]">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">
-              Loved by businesses worldwide
-            </h2>
-            <p className="text-xl text-[#6B7280] max-w-2xl mx-auto">
-              See what our customers have to say about our features
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
-              {
-                quote: "The automation features have saved us countless hours each week. We can now focus on what really matters - building relationships with our customers.",
-                author: "Sarah Johnson",
-                role: "Sales Director",
-                company: "TechCorp Inc."
-              },
-              {
-                quote: "The analytics and reporting capabilities give us insights we never had before. We've increased our conversion rate by 35% in just 3 months.",
-                author: "Michael Chen",
-                role: "VP of Sales",
-                company: "Growth Solutions"
-              },
-              {
-                quote: "Integration with our existing tools was seamless. The customer support team was incredibly helpful throughout the onboarding process.",
-                author: "Emily Rodriguez",
-                role: "Operations Manager",
-                company: "ServicePro LLC"
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="text-4xl text-[#2563EB] mb-4">&quot;</div>
-                  <p className="text-[#6B7280] mb-6 italic">{testimonial.quote}</p>
-                  <div>
-                    <p className="font-semibold text-[#111827]">{testimonial.author}</p>
-                    <p className="text-sm text-[#6B7280]">{testimonial.role}</p>
-                    <p className="text-sm text-[#6B7280]">{testimonial.company}</p>
+              { icon: Calendar, title: 'Calendar & Scheduling', description: 'Smart scheduling with calendar sync and meeting reminders', color: 'blue' },
+              { icon: FileText, title: 'Document Management', description: 'Secure storage with version control and access permissions', color: 'purple' },
+              { icon: TrendingUp, title: 'Revenue Tracking', description: 'Real-time revenue analytics and forecasting', color: 'green' },
+              { icon: Globe, title: 'Multi-Language', description: 'Support for 50+ languages and currencies', color: 'orange' },
+              { icon: Lock, title: 'Data Privacy', description: 'Full control over your data with export and deletion options', color: 'red' },
+              { icon: Zap, title: 'API Access', description: 'RESTful API for custom integrations and automation', color: 'yellow' },
+            ].map((feature, index) => (
+              <Card 
+                key={index}
+                className="fade-in opacity-0 translate-y-8 transition-all duration-700 border-0 shadow-lg hover:shadow-2xl bg-white group relative overflow-hidden"
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <CardContent className="p-8 relative">
+                  <div className={`inline-flex p-4 rounded-xl ${
+                    feature.color === 'blue' ? 'bg-blue-600' :
+                    feature.color === 'purple' ? 'bg-purple-600' :
+                    feature.color === 'green' ? 'bg-green-600' :
+                    feature.color === 'orange' ? 'bg-orange-600' :
+                    feature.color === 'red' ? 'bg-red-600' : 'bg-yellow-600'
+                  } mb-4 transform group-hover:scale-110 transition-transform`}>
+                    <feature.icon className="h-6 w-6 text-white" />
                   </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -342,92 +349,93 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-4">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-xl text-[#6B7280]">
-                Have questions about our features? We&apos;ve got answers.
-              </p>
-            </div>
-            
-            <div className="space-y-6">
-              {[
-                {
-                  question: "Can I try the features before committing to a paid plan?",
-                  answer: "Absolutely! We offer a 14-day free trial with access to all Professional plan features. No credit card required."
-                },
-                {
-                  question: "How easy is it to migrate my data from another CRM?",
-                  answer: "Very easy! We provide a dedicated migration tool and our support team will help you import your customer data, leads, and interaction history from most popular CRM platforms."
-                },
-                {
-                  question: "Can I customize the features to match my business workflow?",
-                  answer: "Yes! Our platform is highly customizable. You can create custom fields, workflows, pipelines, and reports tailored to your specific business needs."
-                },
-                {
-                  question: "Do you offer training for new users?",
-                  answer: "Yes, we provide comprehensive onboarding training, video tutorials, documentation, and live webinars. Enterprise customers also get access to a dedicated account manager."
-                },
-                {
-                  question: "Is my data secure?",
-                  answer: "Security is our top priority. We use enterprise-grade encryption, regular security audits, and are fully GDPR and SOC 2 compliant. Your data is backed up daily."
-                },
-                {
-                  question: "Can I integrate CRM Pro with my existing tools?",
-                  answer: "Yes! We offer native integrations with over 100 popular business tools including Gmail, Slack, Zoom, QuickBooks, and more. We also provide a robust API for custom integrations."
-                }
-              ].map((faq, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-start">
-                      <span className="text-[#2563EB] mr-3 text-xl font-bold">Q.</span>
-                      {faq.question}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-[#6B7280] pl-8">{faq.answer}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="text-center mt-12">
-              <p className="text-[#6B7280] mb-4">Still have questions?</p>
-              <Button variant="outline" asChild>
-                <Link href="/contact">
-                  Contact Support
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+      {/* Integrations Section - Enhanced */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 fade-in opacity-0 translate-y-8 transition-all duration-700">
+            <Badge className="mb-4 px-4 py-1 bg-purple-100 text-purple-700 border-0">
+              Integrations
+            </Badge>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+              Connect <span className="text-purple-600">Everything</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Seamlessly integrate with 100+ popular business tools
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-4 max-w-6xl mx-auto">
+            {integrations.map((tool, index) => (
+              <Card 
+                key={index}
+                className="fade-in opacity-0 translate-y-8 transition-all duration-700 border-0 shadow-md hover:shadow-xl bg-white group cursor-pointer hover:scale-105"
+                style={{ transitionDelay: `${index * 50}ms` }}
+              >
+                <CardContent className="p-6 flex items-center justify-center h-24">
+                  <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                    {tool}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12 fade-in opacity-0 translate-y-8 transition-all duration-700">
+            <p className="text-gray-600 mb-6">And 100+ more integrations available</p>
+            <Button variant="outline" size="lg" className="group border-2 hover:bg-gray-50" asChild>
+              <Link href="/contact" className="flex items-center">
+                Request Integration
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-[#2563EB]">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to experience these features?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Start your free trial today and see how CRM Pro can transform your business.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="/signup">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-[#2563EB]" asChild>
-              <Link href="/pricing">View Pricing</Link>
-            </Button>
+      {/* CTA Section - Dynamic */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=1920&h=1080&fit=crop"
+            alt="Get started with CRM"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-purple-900/90"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center fade-in opacity-0 translate-y-8 transition-all duration-700 relative z-10">
+            <Rocket className="h-16 w-16 text-blue-400 mx-auto mb-6 animate-bounce" />
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Ready to <span className="bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">Transform</span> Your Business?
+            </h2>
+            <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+              Start your free trial today and see how CRM Pro can transform your business.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="group px-8 py-6 text-lg bg-white text-blue-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-semibold"
+                asChild
+              >
+                <Link href="/signup" className="flex items-center">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="px-8 py-6 text-lg border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all duration-300"
+                asChild
+              >
+                <Link href="/pricing">View Pricing</Link>
+              </Button>
+            </div>
+            <p className="text-sm text-blue-200 mt-6">
+              No credit card required • 14-day free trial • Cancel anytime
+            </p>
           </div>
         </div>
       </section>

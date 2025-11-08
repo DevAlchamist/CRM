@@ -95,9 +95,9 @@ export default function SuperAdminAnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Premium Header */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl">
+      <div className="bg-indigo-600 text-white shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Button
             variant="outline"
@@ -165,7 +165,7 @@ export default function SuperAdminAnalyticsPage() {
                 <span className="text-green-600 font-medium">{metrics.revenue.achieved}% achieved</span>
               </div>
               <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${metrics.revenue.achieved}%` }} />
+                <div className="h-full bg-green-600" style={{ width: `${metrics.revenue.achieved}%` }} />
               </div>
             </CardContent>
           </Card>
@@ -189,7 +189,7 @@ export default function SuperAdminAnalyticsPage() {
                 <span className="text-blue-600 font-medium">{metrics.users.achieved}% achieved</span>
               </div>
               <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600" style={{ width: `${metrics.users.achieved}%` }} />
+                <div className="h-full bg-blue-600" style={{ width: `${metrics.users.achieved}%` }} />
               </div>
             </CardContent>
           </Card>
@@ -213,7 +213,7 @@ export default function SuperAdminAnalyticsPage() {
                 <span className="text-purple-600 font-medium">{metrics.companies.achieved}% achieved</span>
               </div>
               <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-purple-400 to-purple-600" style={{ width: `${metrics.companies.achieved}%` }} />
+                <div className="h-full bg-purple-600" style={{ width: `${metrics.companies.achieved}%` }} />
               </div>
             </CardContent>
           </Card>
@@ -229,7 +229,7 @@ export default function SuperAdminAnalyticsPage() {
                   <p className="text-3xl font-bold text-gray-900">{metrics.activeRate.current}%</p>
                   <p className="text-sm text-green-600 mt-1">+{metrics.activeRate.growth}% from last period</p>
                 </div>
-                <div className="h-16 w-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
+                <div className="h-16 w-16 bg-orange-600 rounded-xl flex items-center justify-center">
                   <Activity className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function SuperAdminAnalyticsPage() {
                   <p className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.avgRevenue.current)}</p>
                   <p className="text-sm text-green-600 mt-1">+{metrics.avgRevenue.growth}% from last period</p>
                 </div>
-                <div className="h-16 w-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center">
+                <div className="h-16 w-16 bg-teal-600 rounded-xl flex items-center justify-center">
                   <Target className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -259,7 +259,7 @@ export default function SuperAdminAnalyticsPage() {
                   <p className="text-3xl font-bold text-gray-900">{metrics.conversion.current}%</p>
                   <p className="text-sm text-green-600 mt-1">+{metrics.conversion.growth}% from last period</p>
                 </div>
-                <div className="h-16 w-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center">
+                <div className="h-16 w-16 bg-pink-600 rounded-xl flex items-center justify-center">
                   <Percent className="h-8 w-8 text-white" />
                 </div>
               </div>
@@ -304,21 +304,21 @@ export default function SuperAdminAnalyticsPage() {
             </CardHeader>
             <CardContent>
               {/* Enhanced Chart */}
-              <div className="h-80 bg-gradient-to-b from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+              <div className="h-80 bg-gray-50 rounded-xl p-6 border border-gray-200">
                 <div className="flex items-end justify-between h-full space-x-3">
                   {revenueByMonth.map((item, index) => {
                     const value = selectedMetric === 'revenue' ? item.revenue :
                                  selectedMetric === 'users' ? item.users :
                                  item.companies;
                     const height = (value / maxValue) * 100;
-                    const colors = selectedMetric === 'revenue' ? 'from-green-400 to-green-600' :
-                                  selectedMetric === 'users' ? 'from-blue-400 to-blue-600' :
-                                  'from-purple-400 to-purple-600';
+                    const colorClass = selectedMetric === 'revenue' ? 'bg-green-600' :
+                                      selectedMetric === 'users' ? 'bg-blue-600' :
+                                      'bg-purple-600';
                     
                     return (
                       <div key={index} className="flex-1 flex flex-col items-center justify-end group">
                         <div
-                          className={`w-full bg-gradient-to-t ${colors} rounded-t-xl hover:opacity-80 transition-all cursor-pointer relative shadow-lg`}
+                          className={`w-full ${colorClass} rounded-t-xl hover:opacity-80 transition-all cursor-pointer relative shadow-lg`}
                           style={{ height: `${height}%` }}
                         >
                           {/* Tooltip */}
@@ -356,7 +356,7 @@ export default function SuperAdminAnalyticsPage() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="h-2.5 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"
+                        className="h-2.5 bg-indigo-600 rounded-full"
                         style={{ width: `${(day.active / 2200) * 100}%` }}
                       />
                     </div>
@@ -392,7 +392,7 @@ export default function SuperAdminAnalyticsPage() {
                   <div key={index} className="group hover:bg-gray-50 p-3 rounded-lg transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <div className="h-10 w-10 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        <div className="h-10 w-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
                           {industry.count}
                         </div>
                         <div>
@@ -411,7 +411,7 @@ export default function SuperAdminAnalyticsPage() {
                     <div className="flex items-center space-x-2">
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-indigo-400 to-purple-600"
+                          className="h-full bg-indigo-600"
                           style={{ width: `${industry.percentage}%` }}
                         />
                       </div>
@@ -462,9 +462,9 @@ export default function SuperAdminAnalyticsPage() {
                       <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            sub.color === 'purple' ? 'bg-gradient-to-r from-purple-400 to-purple-600' :
-                            sub.color === 'blue' ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                            sub.color === 'green' ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                            sub.color === 'purple' ? 'bg-purple-600' :
+                            sub.color === 'blue' ? 'bg-blue-600' :
+                            sub.color === 'green' ? 'bg-green-600' :
                             'bg-gray-400'
                           }`}
                           style={{ width: `${sub.percentage}%` }}
@@ -503,15 +503,15 @@ export default function SuperAdminAnalyticsPage() {
               {topCompanies.map((company) => (
                 <div
                   key={company.rank}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                  className="flex items-center justify-between p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => router.push(`/super-admin/companies/${company.rank}`)}
                 >
                   <div className="flex items-center space-x-4 flex-1">
                     <div className={`h-14 w-14 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg ${
-                      company.rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
-                      company.rank === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-500' :
-                      company.rank === 3 ? 'bg-gradient-to-br from-orange-400 to-orange-600' :
-                      'bg-gradient-to-br from-blue-400 to-blue-600'
+                      company.rank === 1 ? 'bg-yellow-600' :
+                      company.rank === 2 ? 'bg-gray-500' :
+                      company.rank === 3 ? 'bg-orange-600' :
+                      'bg-blue-600'
                     }`}>
                       #{company.rank}
                     </div>
@@ -547,7 +547,7 @@ export default function SuperAdminAnalyticsPage() {
 
         {/* Insights and Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+          <Card className="bg-green-50 border-2 border-green-200">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3">
                 <div className="h-10 w-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -563,7 +563,7 @@ export default function SuperAdminAnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200">
+          <Card className="bg-yellow-50 border-2 border-yellow-200">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3">
                 <div className="h-10 w-10 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -579,7 +579,7 @@ export default function SuperAdminAnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+          <Card className="bg-blue-50 border-2 border-blue-200">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3">
                 <div className="h-10 w-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">

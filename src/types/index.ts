@@ -227,7 +227,7 @@ export interface DocumentActivity {
     url: string;
   };
   timestamp: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface DocumentActivityStats {
