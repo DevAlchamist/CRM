@@ -25,6 +25,8 @@ export function SiteHeader() {
     '/settings',
     '/billing',
     '/super-admin',
+    '/login',
+    '/signup',
   ];
   if (pathname && dashboardRoots.some((r) => pathname.startsWith(r))) return null;
 

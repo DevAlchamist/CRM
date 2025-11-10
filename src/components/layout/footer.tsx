@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { 
   Facebook, 
   Twitter, 
@@ -13,8 +14,37 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+const HIDDEN_PREFIXES = [
+  '/dashboard',
+  '/admin',
+  '/billing',
+  '/calendar',
+  '/customers',
+  '/documents',
+  '/employees',
+  '/leads',
+  '/messages',
+  '/reports',
+  '/settings',
+  '/tasks',
+  '/super-admin',
+  '/login',
+  '/signup',
+];
+
 export function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  const shouldHideFooter = React.useMemo(() => {
+    return HIDDEN_PREFIXES.some((prefix) => {
+      return pathname === prefix || pathname.startsWith(`${prefix}/`);
+    });
+  }, [pathname]);
+
+  if (shouldHideFooter) {
+    return null;
+  }
 
   const footerLinks = {
     product: [
